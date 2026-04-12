@@ -1,22 +1,24 @@
-import { Listing, Report, User } from '../types';
+import { Listing, Report, User, ListingStatus } from '../types';
+import { mockListings } from '../data/listings';
+import { mockUsers } from '../data/users';
 
 export const moderationService = {
   getPendingListings: async (): Promise<Listing[]> => {
-    return [];
+    return mockListings.filter(l => l.status === ListingStatus.PUBLISHED); // Simuler des annonces à valider
   },
   approveListing: async (id: string): Promise<void> => {
-    // Logic
+    console.log('Approved', id);
   },
   rejectListing: async (id: string, reason: string): Promise<void> => {
-    // Logic
+    console.log('Rejected', id, reason);
   },
   getReports: async (): Promise<Report[]> => {
     return [];
   },
   resolveReport: async (id: string, action: 'mask' | 'dismiss' | 'ban'): Promise<void> => {
-    // Logic
+    console.log('Resolved report', id, action);
   },
   getBannedUsers: async (): Promise<User[]> => {
-    return [];
+    return mockUsers.filter(u => !u.is_active);
   }
 };

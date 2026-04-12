@@ -1,16 +1,17 @@
 import { User, LoginCredentials, RegisterCredentials } from '../types';
+import { mockUsers } from '../data/users';
 
 export const authService = {
   login: async (credentials: LoginCredentials) => {
-    // Logic for login
+    return mockUsers[0]; // Simuler une connexion réussie
   },
   register: async (data: RegisterCredentials) => {
-    // Logic for registration
+    return mockUsers[0];
   },
   logout: () => {
-    // Logic for logout
+    console.log('Logged out');
   },
   getCurrentUser: (): User | null => {
-    return null;
+    return mockUsers[0];
   }
 };

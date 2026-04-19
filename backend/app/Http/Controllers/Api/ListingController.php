@@ -42,6 +42,15 @@ class ListingController extends Controller
             $query->where('price', '<=', $request->input('price_max'));
         }
 
+        // Filter by categories (array of slugs or IDs)
+        if ($request->filled('categories')) {
+            $categories = explode(',', $request->input('categories'));
+            $query->whereHas('categories', function($q) use ($categories) {
+                $q->whereIn('slug', $categories)
+                  ->orWhereIn('categories.id', $categories);
+            });
+        }
+
         // Filter by user
         if ($request->filled('user')) {
             if ($request->input('user') === 'me' && $request->user()) {
@@ -85,7 +94,7 @@ class ListingController extends Controller
             ->where('id', $listing->id)
             ->increment('views_count');
 
-        $listing->load(['user:id,name,email', 'photos']);
+        $listing->load(['user:id,name,email', 'photos', 'categories', 'priceHistories']);
         $listing->views_count += 1; // Reflect in response
 
         // Add favorite status if authenticated
@@ -108,6 +117,26 @@ class ListingController extends Controller
      */
     public function store(StoreListingRequest $request): JsonResponse
     {
+        // Suggestion anti-doublon intelligente
+        // Recherche des mots clés du titre pour alerter d'un possible doublon par cet utilisateur
+        $words = array_filter(explode(' ', $request->title), fn($w) => strlen($w) > 3);
+        $possibleDuplicates = null;
+        if (!empty($words) && !$request->has('force_create')) {
+            $dupQuery = Listing::where('user_id', $request->user()->id);
+            foreach ($words as $word) {
+                $dupQuery->orWhere('title', 'like', "%{$word}%");
+            }
+            $existing = $dupQuery->first();
+            
+            if ($existing) {
+                return response()->json([
+                    'message' => 'Vous avez peut-être déjà posté cet article.',
+                    'duplicate_suggestion' => clone $existing,
+                    'prompt' => 'Envoyez "force_create" à true pour publier quand même.'
+                ], 409); // Conflict HTTP status specifically to handle this frontend-side
+            }
+        }
+
         $listing = Listing::create([
             'user_id' => $request->user()->id,
             'title' => $request->title,
@@ -117,7 +146,11 @@ class ListingController extends Controller
             'status' => 'draft',
         ]);
 
-        $listing->load('photos');
+        if ($request->has('categories')) {
+            $listing->categories()->sync($request->input('categories'));
+        }
+
+        $listing->load('photos', 'categories');
 
         return response()->json([
             'message' => 'Annonce créée avec succès. Elle sera visible après validation par un modérateur.',

@@ -40,6 +40,9 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+// User public profile (stats)
+Route::get('/users/{user}', [\App\Http\Controllers\Api\UserController::class, 'show']);
+
 // Email Verification
 Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
     ->middleware(['auth:sanctum', 'signed'])

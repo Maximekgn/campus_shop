@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'student_id',
         'is_active',
         'ban_until',
+        'last_seen_at',
     ];
 
     /**
@@ -45,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'ban_until' => 'datetime',
+            'last_seen_at' => 'datetime',
         ];
     }
 

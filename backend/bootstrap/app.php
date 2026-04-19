@@ -21,6 +21,10 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Sanctum stateful domains for SPA (if used with web frontend)
         $middleware->statefulApi();
+
+        $middleware->api(append: [
+            \App\Http\Middleware\UpdateLastSeen::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

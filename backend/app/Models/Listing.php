@@ -96,11 +96,24 @@ class Listing extends Model
         return $this->belongsToMany(User::class, 'favorites')->withTimestamps();
     }
 
-    /**
-     * Reports against this listing.
-     */
     public function reports(): HasMany
     {
         return $this->hasMany(Report::class);
+    }
+
+    /**
+     * Categories of this listing.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'listing_category');
+    }
+
+    /**
+     * Price histories for this listing.
+     */
+    public function priceHistories(): HasMany
+    {
+        return $this->hasMany(ListingPriceHistory::class)->orderBy('created_at', 'desc');
     }
 }

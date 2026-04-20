@@ -5,9 +5,11 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function LoginPage(): ReactNode {
   const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,6 @@ export default function LoginPage(): ReactNode {
     setLoading(true);
     setError('');
 
-    // Simulation d'authentification
     if (!formData.email || !formData.password) {
       setError('Tous les champs sont requis');
       setLoading(false);
@@ -31,13 +32,17 @@ export default function LoginPage(): ReactNode {
     }
 
     try {
-      // Appel API fictif
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Simuler succès
-      localStorage.setItem('user', JSON.stringify({ email: formData.email }));
-      router.push('/');
-    } catch (err) {
+      const result = await login(formData.email, formData.password);
+      if (!result.success) {
+        setError(result.error ?? 'Erreur de connexion');
+        return;
+      }
+      if (result.user?.role === 'moderator') {
+        router.push('/admin');
+      } else {
+        router.push('/my-listings');
+      }
+    } catch {
       setError('Erreur de connexion');
     } finally {
       setLoading(false);
@@ -113,7 +118,7 @@ export default function LoginPage(): ReactNode {
         {/* Info */}
         <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <p className="text-xs text-[var(--color-muted)]">
-            💡 <strong>Démo :</strong> Utilise n'importe quel email et mot de passe pour tester.
+            Compte etudiant ou moderateur requis pour acceder a l'espace CampusShop.
           </p>
         </div>
       </div>

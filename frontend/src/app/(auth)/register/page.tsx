@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { useAuth } from '@/hooks/useAuth';
 
 type RegisterFormData = {
   name: string;
@@ -16,6 +17,7 @@ type RegisterFormData = {
 
 export default function RegisterPage(): ReactNode {
   const router = useRouter();
+  const { register } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     email: '',
@@ -37,7 +39,6 @@ export default function RegisterPage(): ReactNode {
     setLoading(true);
     setError('');
 
-    // Validation
     if (!formData.name || !formData.email || !formData.password || !formData.student_id) {
       setError('Tous les champs sont requis');
       setLoading(false);
@@ -57,17 +58,13 @@ export default function RegisterPage(): ReactNode {
     }
 
     try {
-      // Appel API fictif
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Simuler succès
-      localStorage.setItem('user', JSON.stringify({ 
-        email: formData.email,
-        name: formData.name,
-        student_id: formData.student_id 
-      }));
+      const result = await register(formData.name, formData.email, formData.password);
+      if (!result.success) {
+        setError(result.error ?? "Erreur lors de l'inscription");
+        return;
+      }
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('Erreur lors de l\'inscription');
     } finally {
       setLoading(false);

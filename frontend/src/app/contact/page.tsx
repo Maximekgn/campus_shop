@@ -3,6 +3,7 @@
 import { ReactNode, useState, ChangeEvent, FormEvent } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import { api } from '@/services/api';
 
 export default function ContactPage(): ReactNode {
   const [formData, setFormData] = useState({
@@ -12,23 +13,32 @@ export default function ContactPage(): ReactNode {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+    setError('');
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // TODO: Envoyer le formulaire au backend
-    console.log('Form submitted:', formData);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
+    setError('');
+    setIsSubmitting(true);
+
+    try {
+      await api.post('/contact', formData);
+      setSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 3000);
+      setTimeout(() => setSubmitted(false), 3000);
+    } catch {
+      setError("Impossible d'envoyer le message pour le moment.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -61,6 +71,12 @@ export default function ContactPage(): ReactNode {
         {submitted && (
           <div className="mb-6 rounded-[16px] bg-green-100 p-4 text-sm font-semibold text-green-700">
             ✓ Merci ! Ton message a été envoyé. Nous te répondrons bientôt.
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 rounded-[16px] border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+            {error}
           </div>
         )}
 
@@ -116,7 +132,9 @@ export default function ContactPage(): ReactNode {
           />
         </div>
 
-        <Button className="w-full">Envoyer le message</Button>
+        <Button className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? 'Envoi en cours...' : 'Envoyer le message'}
+        </Button>
       </form>
     </div>
   );

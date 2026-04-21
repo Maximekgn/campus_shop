@@ -26,12 +26,5 @@ class AppServiceProvider extends ServiceProvider
         if (env('APP_ENV') === 'production') {
             URL::forceScheme('https');
         }
-        
-        // Override email verification routes for API
-        if (!$this->app->runningInConsole()) {
-            $url->route('verification.notice', function () {
-                return response()->json(['message' => 'Vérifiez votre email']);
-            }, false);
-        }
     }
 }

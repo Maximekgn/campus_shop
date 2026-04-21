@@ -1,8 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { usePathname } from "next/navigation";
+import { messageService } from "@/services/message.service";
+import { MessageCircle, Bell } from "lucide-react";
 
 const navLinks = [
   { href: "/listings",    label: "Annonces"      },
@@ -13,6 +16,14 @@ const navLinks = [
 export default function Navbar() {
   const { user, isAuthenticated, logout } = useAuth();
   const pathname = usePathname();
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    messageService.getUnreadCount()
+      .then(setUnreadCount)
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   return (
     <header className="sticky top-0 z-40 border-b border-[var(--color-border)] bg-white/95 backdrop-blur-sm">
@@ -28,20 +39,56 @@ export default function Navbar() {
 
         {/* Nav */}
         <nav className="hidden items-center gap-6 md:flex">
-          {user?.role !== "moderateur" &&
-            navLinks.map(({ href, label }) => (
+          <Link
+            href="/listings"
+            className={`text-sm transition ${
+              pathname === "/listings"
+                ? "font-semibold text-[var(--color-foreground)]"
+                : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+            }`}
+          >
+            Annonces
+          </Link>
+
+          {isAuthenticated && user?.role !== "moderateur" && (
+            <>
               <Link
-                key={href}
-                href={href}
+                href="/my-listings"
                 className={`text-sm transition ${
-                  pathname === href
+                  pathname === "/my-listings"
                     ? "font-semibold text-[var(--color-foreground)]"
                     : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
                 }`}
               >
-                {label}
+                Mes annonces
               </Link>
-            ))}
+              <Link
+                href="/favorites"
+                className={`text-sm transition ${
+                  pathname === "/favorites"
+                    ? "font-semibold text-[var(--color-foreground)]"
+                    : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+                }`}
+              >
+                Favoris
+              </Link>
+              <Link
+                href="/messages"
+                className={`relative text-sm transition ${
+                  pathname.startsWith("/messages")
+                    ? "font-semibold text-[var(--color-foreground)]"
+                    : "text-[var(--color-muted)] hover:text-[var(--color-foreground)]"
+                }`}
+              >
+                <MessageCircle className="h-5 w-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* Auth */}

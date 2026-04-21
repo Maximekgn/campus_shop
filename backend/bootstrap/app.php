@@ -16,7 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
-            'role:moderator' => EnsureUserIsModerator::class,
+            'role:moderateur' => EnsureUserIsModerator::class,
         ]);
 
         // Note: statefulApi() removed - using Bearer tokens + CORS instead

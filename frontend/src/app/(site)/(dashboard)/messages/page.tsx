@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { messageService } from "@/services/message.service";
 import { mockConversations } from "@/data/messages";
 import { mockListings } from "@/data/listings";
@@ -14,14 +15,40 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
+    const listingId = searchParams.get("listing");
+    if (listingId) {
+      messageService.createConversation(Number(listingId))
+        .then((data) => {
+          const conversation = data.conversation as Conversation;
+          router.replace(`/messages/${conversation.id}`);
+        })
+        .catch((err: { response?: { status?: number } }) => {
+          if (err?.response?.status === 401) {
+            router.replace(`/login?redirect=/messages?listing=${listingId}`);
+          } else {
+            router.replace("/messages");
+          }
+        });
+      return;
+    }
+
     messageService
       .getConversations()
       .then((data) => setConversations(data.data || data))
-      .catch(() => { setError(true); setConversations(mockConversations as Conversation[]); })
+      .catch((err: { response?: { status?: number } }) => {
+        if (err?.response?.status === 401) {
+          router.replace("/login");
+          return;
+        }
+        setError(true);
+        setConversations(mockConversations as Conversation[]);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [searchParams, router]);
 
   if (loading) {
     return (

@@ -7,16 +7,23 @@ import type { ListingPhoto } from '@/types';
 
 type PhotoGalleryProps = {
   photos: ListingPhoto[];
+  listingId?: number;
 };
 
-export default function PhotoGallery({ photos }: PhotoGalleryProps): ReactNode {
+export default function PhotoGallery({ photos, listingId }: PhotoGalleryProps): ReactNode {
   const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState<number>(0);
 
   if (!photos || photos.length === 0) {
+    const defaultImage = `https://picsum.photos/seed/${listingId || 'default'}/800/600`;
     return (
-      <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-16 text-center">
-        <p className="text-[var(--color-muted)]">Aucune photo disponible</p>
+      <div className="relative h-96 w-full overflow-hidden rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)]">
+        <Image
+          src={defaultImage}
+          alt="Image par défaut"
+          fill
+          className="object-cover"
+        />
       </div>
     );
   }

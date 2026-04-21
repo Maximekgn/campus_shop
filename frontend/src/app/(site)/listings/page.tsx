@@ -10,12 +10,14 @@ import {
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { mockListings } from "@/data/listings";
 import type { Listing } from "@/types";
+import { ArrowLeft, ArrowRight, SlidersHorizontal } from "lucide-react";
 
 export default function ListingsPage() {
   const [filters, setFilters] = useState<Filters>({});
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
     page: 1,
     last_page: 1,
@@ -57,57 +59,84 @@ export default function ListingsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-10">
-        <h1 className="mb-2 text-4xl font-semibold text-[var(--color-foreground)]">
-          Annonces
-        </h1>
-        <p className="text-[var(--color-muted)]">
-          {pagination.total} annonce{pagination.total > 1 ? "s" : ""} trouvée
-          {pagination.total > 1 ? "s" : ""}
-        </p>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+
+      {/* Header */}
+      <div className="mb-8 flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-foreground)]">
+            Annonces
+          </h1>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">
+            {pagination.total} résultat{pagination.total !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-foreground)]"
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          Filtres
+        </button>
       </div>
 
-      <div className="mb-8">
-        <ListingFilters onFilter={handleFilter} />
-      </div>
+      {/* Filters */}
+      {showFilters && (
+        <div className="mb-8 rounded-2xl border border-[var(--color-border)] bg-white p-5">
+          <ListingFilters onFilter={handleFilter} />
+        </div>
+      )}
 
+      {/* Offline banner */}
+      {error && (
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Mode hors ligne — résultats limités.
+        </div>
+      )}
+
+      {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-16">
+        <div className="flex justify-center py-24">
           <LoadingSpinner />
         </div>
       ) : listings.length === 0 ? (
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] py-16 text-center">
-          <p className="text-lg text-[var(--color-muted)]">
-            Aucune annonce ne correspond à tes critères.
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] py-24 text-center">
+          <p className="text-base font-medium text-[var(--color-foreground)]">
+            Aucun résultat
+          </p>
+          <p className="mt-1 text-sm text-[var(--color-muted)]">
+            Essaie de modifier tes filtres de recherche.
           </p>
         </div>
       ) : (
         <>
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {listings.map((listing) => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
 
+          {/* Pagination */}
           {pagination.last_page > 1 && (
-            <div className="mt-8 flex justify-center gap-2">
+            <div className="mt-10 flex items-center justify-center gap-3">
               <button
                 onClick={() => fetchListings(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="rounded-lg border border-[var(--color-border)] px-4 py-2 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-foreground)] disabled:pointer-events-none disabled:opacity-40"
               >
+                <ArrowLeft className="h-4 w-4" />
                 Précédent
               </button>
-              <span className="px-4 py-2 text-[var(--color-muted)]">
+              <span className="min-w-[5rem] text-center text-sm text-[var(--color-muted)]">
                 {pagination.page} / {pagination.last_page}
               </span>
               <button
                 onClick={() => fetchListings(pagination.page + 1)}
                 disabled={pagination.page === pagination.last_page}
-                className="rounded-lg border border-[var(--color-border)] px-4 py-2 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-foreground)] transition hover:border-[var(--color-foreground)] disabled:pointer-events-none disabled:opacity-40"
               >
                 Suivant
+                <ArrowRight className="h-4 w-4" />
               </button>
             </div>
           )}

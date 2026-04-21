@@ -1,42 +1,35 @@
 "use client";
 
 import { ReactNode, useState, ChangeEvent, FormEvent } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/Button";
 import { api } from "@/services/api";
-import { ArrowLeft, Mail, MapPin, Check } from "lucide-react";
+import { Mail, MapPin, Check } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+
+const inputClass =
+  "mt-1.5 w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-foreground)] focus:ring-2 focus:ring-[var(--color-border)] placeholder:text-[var(--color-muted)]";
 
 export default function ContactPage(): ReactNode {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    subject: "",
-    message: "",
+    name: "", email: "", subject: "", message: "",
   });
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
     setIsSubmitting(true);
-
+    setError("");
     try {
       await api.post("/contact", formData);
       setSubmitted(true);
       setFormData({ name: "", email: "", subject: "", message: "" });
-      setTimeout(() => setSubmitted(false), 3000);
+      setTimeout(() => setSubmitted(false), 4000);
     } catch {
       setError("Impossible d'envoyer le message pour le moment.");
     } finally {
@@ -45,123 +38,103 @@ export default function ContactPage(): ReactNode {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
+
       {/* Header */}
       <div className="mb-10">
-        <Link href="/">
-          <button className="flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] mb-4">
-            <ArrowLeft className="h-4 w-4" /> Retour
-          </button>
-        </Link>
-        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">
+        <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+          Contact
+        </p>
+        <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-foreground)]">
           Nous contacter
         </h1>
-        <p className="mt-2 text-[var(--color-muted)]">
-          Une question ? Un problème ? Contacte-nous et nous te répondrons
-          rapidement.
+        <p className="mt-3 text-base text-[var(--color-muted)]">
+          Une question ou un problème ? Envoie-nous un message et nous te répondrons rapidement.
         </p>
       </div>
 
-      {/* Contact Info */}
-      <div className="mb-10 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-soft)] p-4">
-          <p className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+      {/* Info cards */}
+      <div className="mb-8 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
             <Mail className="h-4 w-4" /> Email
           </p>
-          <p className="mt-2 font-semibold text-[var(--color-foreground)]">
+          <p className="mt-2 text-sm font-medium text-[var(--color-foreground)]">
             support@campusshop.tg
           </p>
         </div>
-        <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-soft)] p-4">
-          <p className="flex items-center gap-2 text-sm text-[var(--color-muted)]">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-4">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
             <MapPin className="h-4 w-4" /> Localisation
           </p>
-          <p className="mt-2 font-semibold text-[var(--color-foreground)]">
-            Lomé, Togo
-          </p>
+          <p className="mt-2 text-sm font-medium text-[var(--color-foreground)]">Lomé, Togo</p>
         </div>
       </div>
 
       {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        className="rounded-[28px] border border-[var(--color-border)] bg-white p-8"
-      >
+      <form onSubmit={handleSubmit} className="space-y-5">
+
         {submitted && (
-          <div className="mb-6 rounded-[16px] bg-green-100 p-4 text-sm font-semibold text-green-700 flex items-center gap-2">
-            <Check className="h-4 w-4" /> Merci ! Ton message a été envoyé. Nous
-            te répondrons bientôt.
+          <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+            <Check className="h-4 w-4 shrink-0" />
+            Merci ! Ton message a bien été envoyé.
           </div>
         )}
 
         {error && (
-          <div className="mb-6 rounded-[16px] border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-600">
             {error}
           </div>
         )}
 
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-[var(--color-foreground)]">
-            Nom *
-          </label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            placeholder="Ton nom"
-          />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-sm font-semibold text-[var(--color-foreground)]" htmlFor="name">
+              Nom *
+            </label>
+            <input
+              id="name" type="text" name="name" required
+              value={formData.name} onChange={handleChange}
+              placeholder="Ton nom" className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="text-sm font-semibold text-[var(--color-foreground)]" htmlFor="email">
+              Email *
+            </label>
+            <input
+              id="email" type="email" name="email" required
+              value={formData.email} onChange={handleChange}
+              placeholder="ton@email.com" className={inputClass}
+            />
+          </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-[var(--color-foreground)]">
-            Email *
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-            className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            placeholder="ton@email.com"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-[var(--color-foreground)]">
+        <div>
+          <label className="text-sm font-semibold text-[var(--color-foreground)]" htmlFor="subject">
             Sujet *
           </label>
           <input
-            type="text"
-            name="subject"
-            value={formData.subject}
-            onChange={handleChange}
-            required
-            className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            placeholder="Sujet de ton message"
+            id="subject" type="text" name="subject" required
+            value={formData.subject} onChange={handleChange}
+            placeholder="Sujet de ton message" className={inputClass}
           />
         </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-[var(--color-foreground)]">
+        <div>
+          <label className="text-sm font-semibold text-[var(--color-foreground)]" htmlFor="message">
             Message *
           </label>
           <textarea
-            name="message"
-            value={formData.message}
-            onChange={handleChange}
-            required
-            rows={5}
-            className="mt-2 w-full rounded-[16px] border border-[var(--color-border)] px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
-            placeholder="Raconte-nous ton problème..."
+            id="message" name="message" required rows={5}
+            value={formData.message} onChange={handleChange}
+            placeholder="Décris ton problème ou ta question..."
+            className={inputClass}
           />
         </div>
 
-        <Button className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? "Envoi en cours..." : "Envoyer le message"}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Envoi en cours…" : "Envoyer le message"}
         </Button>
       </form>
     </div>

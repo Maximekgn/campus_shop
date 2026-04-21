@@ -15,33 +15,26 @@ import {
   Flag,
   ArrowLeft,
   MessageCircle,
-  Loader2,
+  CalendarDays,
+  Tag,
 } from "lucide-react";
 
 type ListingDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-function getStatusBadge(status: string) {
-  const statuses: Record<string, { label: string; color: string }> = {
-    publiee: { label: "Disponible", color: "bg-green-100 text-green-700" },
-    reservee: { label: "Réservé", color: "bg-orange-100 text-orange-700" },
-    vendus: { label: "Vendu", color: "bg-red-100 text-red-700" },
-    archivee: { label: "Archivé", color: "bg-gray-100 text-gray-700" },
-  };
-  return (
-    statuses[status] || { label: status, color: "bg-gray-100 text-gray-700" }
-  );
-}
+const statusMap: Record<string, { label: string; color: string }> = {
+  publiee:  { label: "Disponible",  color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  reservee: { label: "Réservé",     color: "bg-amber-50  text-amber-700  border-amber-200"   },
+  vendus:   { label: "Vendu",       color: "bg-red-50    text-red-700    border-red-200"     },
+  archivee: { label: "Archivé",     color: "bg-gray-100  text-gray-500   border-gray-200"    },
+};
 
-function getTypeBadge(type: string) {
-  const types: Record<string, string> = {
-    vente: "À vendre",
-    don: "À donner",
-    echange: "Échange",
-  };
-  return types[type] || type;
-}
+const typeMap: Record<string, string> = {
+  vente:   "À vendre",
+  don:     "À donner",
+  echange: "Échange",
+};
 
 export default function ListingDetailPage({ params }: ListingDetailPageProps) {
   const { id } = use(params);
@@ -52,55 +45,33 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [favoriteLoading, setFavoriteLoading] = useState(false);
 
-  const fetchListing = async () => {
-    setLoading(true);
-    try {
-      const data = await listingService.getById(Number(id));
-      setListing(data);
-      setError(false);
-    } catch (err) {
-      console.error("Failed to fetch listing:", err);
-      setError(true);
-      const found = mockListings.find((l) => l.id === Number(id)) as
-        | Listing
-        | undefined;
-      setListing(found || null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchListing = async () => {
+      setLoading(true);
+      try {
+        const data = await listingService.getById(Number(id));
+        setListing(data);
+      } catch {
+        setError(true);
+        const found = mockListings.find((l) => l.id === Number(id)) as Listing | undefined;
+        setListing(found || null);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchListing();
   }, [id]);
 
-  const handleContact = () => {
-    if (!listing) return;
-    router.push(`/messages?listing=${listing.id}`);
-  };
-
   const handleFavorite = async () => {
+    if (!listing) return;
     setFavoriteLoading(true);
     try {
-      const result = await listingService.toggleFavorite(listing!.id);
+      const result = await listingService.toggleFavorite(listing.id);
       setIsFavorited(result.is_favorited);
-    } catch (err) {
-      console.error("Failed to toggle favorite:", err);
-      setIsFavorited(!isFavorited);
+    } catch {
+      setIsFavorited((v) => !v);
     } finally {
       setFavoriteLoading(false);
-    }
-  };
-
-  const handleReport = () => {
-    if (listing) {
-      router.push(`/report/${listing.id}`);
-    }
-  };
-
-  const handleSellerClick = () => {
-    if (seller?.id) {
-      router.push(`/users/${seller.id}`);
     }
   };
 
@@ -114,108 +85,127 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
 
   if (!listing) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-semibold">Annonce non trouvée</h1>
-          <button
-            onClick={() => router.push("/listings")}
-            className="mt-4 flex items-center gap-2 text-[var(--color-primary)]"
-          >
-            <ArrowLeft className="h-4 w-4" /> Retour aux annonces
-          </button>
-        </div>
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
+        <p className="text-base font-medium text-[var(--color-foreground)]">Annonce introuvable</p>
+        <button
+          onClick={() => router.push("/listings")}
+          className="inline-flex items-center gap-2 text-sm text-[var(--color-muted)] hover:text-[var(--color-foreground)] transition"
+        >
+          <ArrowLeft className="h-4 w-4" /> Retour aux annonces
+        </button>
       </div>
     );
   }
 
-  const statusBadge = getStatusBadge(listing.status);
-  const isReservedOrSold =
-    listing.status === "reservee" || listing.status === "vendue";
-  const seller =
-    listing.user || mockUsers.find((u) => u.id === listing.user_id);
+  const status = statusMap[listing.status] ?? { label: listing.status, color: "bg-gray-100 text-gray-600 border-gray-200" };
+  const isUnavailable = listing.status === "reservee" || listing.status === "vendue";
+  const seller = listing.user || mockUsers.find((u) => u.id === listing.user_id);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">
+
+      {/* Back */}
+      <button
+        onClick={() => router.back()}
+        className="mb-8 inline-flex items-center gap-2 text-sm text-[var(--color-muted)] transition hover:text-[var(--color-foreground)]"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Retour
+      </button>
+
+      {/* Offline */}
       {error && (
-        <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800">
-          Mode hors ligne — Certaines fonctionnalités peuvent être limitées
+        <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+          Mode hors ligne — données limitées.
         </div>
       )}
 
-      <div className="grid gap-10 md:grid-cols-3 lg:gap-12">
-        <div className="md:col-span-2">
-          <PhotoGallery photos={listing.photos || []} />
-        </div>
+      <div className="grid gap-10 md:grid-cols-[1fr_320px] lg:gap-12">
 
-        <div className="space-y-6">
-          <div
-            className={`rounded-[16px] px-4 py-3 text-sm font-semibold ${statusBadge.color}`}
-          >
-            {statusBadge.label}
-          </div>
+        {/* Left — gallery + description */}
+        <div className="space-y-8">
+          <PhotoGallery photos={listing.photos || []} listingId={listing.id} />
 
           <div>
-            <h1 className="mb-4 text-3xl font-semibold text-[var(--color-foreground)]">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+              Description
+            </h2>
+            <p className="mt-3 whitespace-pre-wrap leading-7 text-[var(--color-muted)]">
+              {listing.description}
+            </p>
+          </div>
+        </div>
+
+        {/* Right — sidebar */}
+        <div className="space-y-5">
+
+          {/* Status + Title + Price */}
+          <div className="space-y-3">
+            <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${status.color}`}>
+              {status.label}
+            </span>
+            <h1 className="text-2xl font-semibold leading-snug text-[var(--color-foreground)]">
               {listing.title}
             </h1>
-            <div className="text-4xl font-bold text-[var(--color-primary-dark)]">
-              {listing.price != null ? `${listing.price} FCFA` : "Gratuit"}
-            </div>
+            <p className="text-3xl font-semibold text-[var(--color-foreground)]">
+              {listing.price != null && listing.price > 0
+                ? `${listing.price.toLocaleString()} FCFA`
+                : "Gratuit"}
+            </p>
           </div>
 
-          <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-5 space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-[var(--color-muted)]">Type</span>
-              <span className="font-semibold text-[var(--color-foreground)]">
-                {getTypeBadge(listing.type)}
+          {/* Meta */}
+          <div className="rounded-2xl border border-[var(--color-border)] divide-y divide-[var(--color-border)]">
+            <div className="flex items-center justify-between px-4 py-3 text-sm">
+              <span className="flex items-center gap-2 text-[var(--color-muted)]">
+                <Tag className="h-4 w-4" /> Type
+              </span>
+              <span className="font-medium text-[var(--color-foreground)]">
+                {typeMap[listing.type] ?? listing.type}
               </span>
             </div>
-            <div className="flex justify-between border-t border-[var(--color-border)] pt-3">
-              <span className="text-[var(--color-muted)]">Vues</span>
-              <span className="font-semibold text-[var(--color-foreground)] flex items-center gap-1">
-                <Eye className="h-4 w-4" /> {listing.views_count ?? 0}
+            <div className="flex items-center justify-between px-4 py-3 text-sm">
+              <span className="flex items-center gap-2 text-[var(--color-muted)]">
+                <Eye className="h-4 w-4" /> Vues
+              </span>
+              <span className="font-medium text-[var(--color-foreground)]">
+                {listing.views_count ?? 0}
               </span>
             </div>
-            <div className="flex justify-between border-t border-[var(--color-border)] pt-3">
-              <span className="text-[var(--color-muted)]">Publié</span>
-              <span className="font-semibold text-[var(--color-foreground)]">
+            <div className="flex items-center justify-between px-4 py-3 text-sm">
+              <span className="flex items-center gap-2 text-[var(--color-muted)]">
+                <CalendarDays className="h-4 w-4" /> Publié
+              </span>
+              <span className="font-medium text-[var(--color-foreground)]">
                 {new Date(listing.created_at).toLocaleDateString("fr-FR")}
               </span>
             </div>
           </div>
 
+          {/* Seller */}
           {seller && (
-            <div 
-              className="rounded-[20px] border border-[var(--color-border)] bg-white p-5 cursor-pointer hover:border-[var(--color-primary)] transition"
-              onClick={handleSellerClick}
+            <button
+              type="button"
+              onClick={() => seller.id && router.push(`/users/${seller.id}`)}
+              className="w-full rounded-2xl border border-[var(--color-border)] bg-white p-4 text-left transition hover:border-[var(--color-foreground)]"
             >
-              <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
                 Vendeur
               </p>
-              <div className="space-y-2">
-                <p className="font-semibold text-[var(--color-foreground)]">
-                  {seller.name}
-                </p>
-                <p className="text-sm text-[var(--color-muted)]">
-                  {seller.email}
-                </p>
-                {seller.student_id && (
-                  <p className="text-xs text-[var(--color-muted)]">
-                    ID: {seller.student_id}
-                  </p>
-                )}
-              </div>
-            </div>
+              <p className="mt-2 font-semibold text-[var(--color-foreground)]">{seller.name}</p>
+              <p className="text-sm text-[var(--color-muted)]">{seller.email}</p>
+            </button>
           )}
 
-          <div className="space-y-3">
+          {/* Actions */}
+          <div className="space-y-2.5">
             <Button
               className="w-full"
-              disabled={isReservedOrSold}
-              onClick={handleContact}
+              disabled={isUnavailable}
+              onClick={() => router.push(`/messages?listing=${listing.id}`)}
             >
               <MessageCircle className="mr-2 h-4 w-4" />
-              {isReservedOrSold ? "Non disponible" : "Contacter le vendeur"}
+              {isUnavailable ? "Non disponible" : "Contacter le vendeur"}
             </Button>
             <Button
               variant="secondary"
@@ -229,27 +219,16 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
               {isFavorited ? "Retirer des favoris" : "Ajouter aux favoris"}
             </Button>
           </div>
-        </div>
-      </div>
 
-      <div className="mt-12 space-y-4">
-        <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-          Description
-        </h2>
-        <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-          <p className="whitespace-pre-wrap leading-7 text-[var(--color-muted)]">
-            {listing.description}
-          </p>
+          {/* Report */}
+          <button
+            onClick={() => router.push(`/report/${listing.id}`)}
+            className="flex w-full items-center justify-center gap-2 text-xs text-[var(--color-muted)] transition hover:text-red-500"
+          >
+            <Flag className="h-3.5 w-3.5" />
+            Signaler cette annonce
+          </button>
         </div>
-      </div>
-
-      <div className="mt-10 border-t border-[var(--color-border)] pt-6">
-        <button
-          onClick={handleReport}
-          className="flex items-center gap-2 text-sm text-[var(--color-muted)] transition hover:text-red-500"
-        >
-          <Flag className="h-4 w-4" /> Signaler cette annonce
-        </button>
       </div>
     </div>
   );

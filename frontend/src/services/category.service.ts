@@ -10,7 +10,8 @@ export interface Category {
 export const categoryService = {
   getAll: async (): Promise<Category[]> => {
     try {
-      return await api.get('/categories');
+      const response = await api.get('/categories');
+      return response.data || response;
     } catch {
       return [];
     }

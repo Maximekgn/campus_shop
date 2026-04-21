@@ -1,7 +1,7 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { X } from "lucide-react";
+import { X, ImagePlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -17,104 +17,74 @@ type ListingFormData = {
   category_id: string;
 };
 
-type PhotoFile = {
-  id: string;
-  file: File;
-  preview: string;
-};
+type PhotoFile = { id: string; file: File; preview: string };
+
+const selectClass =
+  "w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-foreground)] appearance-none";
+
+const labelClass = "mb-1.5 block text-sm font-semibold text-[var(--color-foreground)]";
 
 export default function CreateListingPage() {
   const router = useRouter();
   const [formData, setFormData] = useState<ListingFormData>({
-    title: "",
-    description: "",
-    type: "vente",
-    price: "",
-    category_id: "",
+    title: "", description: "", type: "vente", price: "", category_id: "",
   });
   const [photos, setPhotos] = useState<PhotoFile[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   useEffect(() => {
-    categoryService
-      .getAll()
+    categoryService.getAll()
       .then(setCategories)
       .catch(() => setCategories([]))
       .finally(() => setCategoriesLoading(false));
   }, []);
 
   const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     setError("");
   };
 
   const handlePhotoChange = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.currentTarget.files;
     if (!files) return;
-
-    const newPhotos: PhotoFile[] = [];
-    const totalPhotos = photos.length + files.length;
-
-    if (totalPhotos > 3) {
+    if (photos.length + files.length > 3) {
       setError("Maximum 3 photos autorisées");
       return;
     }
-
+    const newPhotos: PhotoFile[] = [];
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      if (file.size > 1024 * 1024) {
-        setError("Chaque photo doit faire moins de 1 Mo");
-        return;
-      }
-      const preview = URL.createObjectURL(file);
-      newPhotos.push({ id: `temp-${Date.now()}-${i}`, file, preview });
+      if (file.size > 1024 * 1024) { setError("Chaque photo doit faire moins de 1 Mo"); return; }
+      newPhotos.push({ id: `temp-${Date.now()}-${i}`, file, preview: URL.createObjectURL(file) });
     }
-
     setPhotos((prev) => [...prev, ...newPhotos]);
     setError("");
   };
 
-  const removePhoto = (id: string) => {
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
-  };
+  const removePhoto = (id: string) => setPhotos((prev) => prev.filter((p) => p.id !== id));
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!formData.title || !formData.description) { setError("Titre et description sont requis"); return; }
+    if (formData.type === "vente" && !formData.price) { setError("Le prix est requis pour une vente"); return; }
     setLoading(true);
     setError("");
-
-    if (!formData.title || !formData.description) {
-      setError("Titre et description sont requis");
-      setLoading(false);
-      return;
-    }
-
-    if (formData.type === "vente" && !formData.price) {
-      setError("Le prix est requis pour une vente");
-      setLoading(false);
-      return;
-    }
-
     try {
       await listingService.create({
         title: formData.title,
         description: formData.description,
         type: formData.type,
         price: formData.type === "don" ? null : parseFloat(formData.price),
-        categories: formData.category_id
-          ? [parseInt(formData.category_id)]
-          : undefined,
+        categories: formData.category_id ? [parseInt(formData.category_id)] : undefined,
       });
       router.push("/my-listings");
-    } catch (err) {
-      console.error("Failed to create listing:", err);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    } catch {
+      await new Promise((r) => setTimeout(r, 1000));
       router.push("/my-listings");
     } finally {
       setLoading(false);
@@ -122,80 +92,56 @@ export default function CreateListingPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-2xl px-4 py-12 sm:px-6 lg:px-8">
+
+      {/* Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">
-          Créer une annonce
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+          Nouvelle annonce
+        </p>
+        <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-foreground)]">
+          Publier une annonce
         </h1>
-        <p className="mt-1 text-[var(--color-muted)]">
-          Vends, donne ou échange avec la communauté
+        <p className="mt-2 text-sm text-[var(--color-muted)]">
+          Vends, donne ou échange avec la communauté étudiante.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-8">
+
+        {/* Error */}
         {error && (
-          <div className="rounded-[16px] border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8 space-y-6">
-          <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-            Informations générales
+        {/* Section — Infos */}
+        <div className="space-y-5">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+            Informations
           </h2>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-[var(--color-foreground)]"
-            >
-              Titre *
-            </label>
-            <Input
-              id="title"
-              type="text"
-              name="title"
-              placeholder="Ex: Livre de Maths L2"
-              value={formData.title}
-              onChange={handleChange}
-              required
-            />
+          <div>
+            <label htmlFor="title" className={labelClass}>Titre *</label>
+            <Input id="title" name="title" type="text" placeholder="Ex: Livre de Maths L2"
+              value={formData.title} onChange={handleChange} required />
           </div>
 
-          <div className="space-y-2">
-            <label
-              htmlFor="description"
-              className="block text-sm font-semibold text-[var(--color-foreground)]"
-            >
-              Description *
-            </label>
+          <div>
+            <label htmlFor="description" className={labelClass}>Description *</label>
             <textarea
-              id="description"
-              name="description"
-              placeholder="Décris ton article en détail"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              rows={6}
-              className="w-full rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
+              id="description" name="description" rows={5} required
+              placeholder="Décris ton article en détail…"
+              value={formData.description} onChange={handleChange}
+              className="w-full rounded-xl border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-foreground)] placeholder:text-[var(--color-muted)] resize-none"
             />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label
-                htmlFor="type"
-                className="block text-sm font-semibold text-[var(--color-foreground)]"
-              >
-                Type d'annonce *
-              </label>
-              <select
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
-              >
+            <div>
+              <label htmlFor="type" className={labelClass}>Type *</label>
+              <select id="type" name="type" value={formData.type} onChange={handleChange} className={selectClass}>
                 <option value="vente">À vendre</option>
                 <option value="don">À donner</option>
                 <option value="echange">Échange</option>
@@ -203,100 +149,60 @@ export default function CreateListingPage() {
             </div>
 
             {!categoriesLoading && categories.length > 0 && (
-              <div className="space-y-2">
-                <label
-                  htmlFor="category_id"
-                  className="block text-sm font-semibold text-[var(--color-foreground)]"
-                >
-                  Catégorie
-                </label>
-                <select
-                  id="category_id"
-                  name="category_id"
-                  value={formData.category_id}
-                  onChange={handleChange}
-                  className="w-full rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
-                >
+              <div>
+                <label htmlFor="category_id" className={labelClass}>Catégorie</label>
+                <select id="category_id" name="category_id" value={formData.category_id}
+                  onChange={handleChange} className={selectClass}>
                   <option value="">Sélectionner</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
+                  {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
             )}
 
             {formData.type === "vente" && (
-              <div className="space-y-2">
-                <label
-                  htmlFor="price"
-                  className="block text-sm font-semibold text-[var(--color-foreground)]"
-                >
-                  Prix (FCFA) *
-                </label>
-                <Input
-                  id="price"
-                  type="number"
-                  name="price"
-                  placeholder="0"
-                  value={formData.price}
-                  onChange={handleChange}
-                  min="0"
-                  step="0.01"
-                  required={formData.type === "vente"}
-                />
+              <div>
+                <label htmlFor="price" className={labelClass}>Prix (FCFA) *</label>
+                <Input id="price" name="price" type="number" placeholder="0" min="0" step="0.01"
+                  value={formData.price} onChange={handleChange} required={formData.type === "vente"} />
               </div>
             )}
           </div>
         </div>
 
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8 space-y-6">
+        {/* Divider */}
+        <div className="border-t border-[var(--color-border)]" />
+
+        {/* Section — Photos */}
+        <div className="space-y-4">
           <div>
-            <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
-              Photos
-            </h2>
-            <p className="mt-1 text-sm text-[var(--color-muted)]">
-              Maximum 3 photos, 1 Mo chacune
-            </p>
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">Photos</h2>
+            <p className="mt-1 text-xs text-[var(--color-muted)]">Maximum 3 photos · 1 Mo par photo</p>
           </div>
 
-          <div className="relative rounded-[20px] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] p-8 text-center transition hover:border-[var(--color-primary)]">
+          {/* Drop zone */}
+          <div className="relative flex items-center justify-center rounded-2xl border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] py-10 transition hover:border-[var(--color-foreground)]">
             <input
-              type="file"
-              multiple
-              accept="image/jpeg,image/png,image/webp"
-              onChange={handlePhotoChange}
-              disabled={photos.length >= 3}
+              type="file" multiple accept="image/jpeg,image/png,image/webp"
+              onChange={handlePhotoChange} disabled={photos.length >= 3}
               className="absolute inset-0 cursor-pointer opacity-0"
             />
-            <div className="pointer-events-none">
-              <p className="text-lg font-semibold text-[var(--color-foreground)]">
-                {photos.length >= 3
-                  ? "3 photos max atteint"
-                  : "Clique ou glisse tes photos"}
+            <div className="pointer-events-none flex flex-col items-center gap-2 text-center">
+              <ImagePlus className="h-7 w-7 text-[var(--color-muted)]" />
+              <p className="text-sm font-medium text-[var(--color-foreground)]">
+                {photos.length >= 3 ? "Maximum atteint" : "Clique ou glisse tes photos"}
               </p>
-              <p className="mt-1 text-sm text-[var(--color-muted)]">
-                {photos.length}/3 photos
-              </p>
+              <p className="text-xs text-[var(--color-muted)]">{photos.length}/3</p>
             </div>
           </div>
 
+          {/* Previews */}
           {photos.length > 0 && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               {photos.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="group relative h-28 overflow-hidden rounded-[16px] border border-[var(--color-border)]"
-                >
-                  <img
-                    src={photo.preview}
-                    alt="Aperçu"
-                    className="h-full w-full object-cover"
-                  />
+                <div key={photo.id} className="group relative h-24 overflow-hidden rounded-xl border border-[var(--color-border)]">
+                  <img src={photo.preview} alt="Aperçu" className="h-full w-full object-cover" />
                   <button
-                    type="button"
-                    onClick={() => removePhoto(photo.id)}
+                    type="button" onClick={() => removePhoto(photo.id)}
                     className="absolute inset-0 flex items-center justify-center bg-black/0 transition hover:bg-black/40"
                   >
                     <X className="h-5 w-5 text-white opacity-0 transition group-hover:opacity-100" />
@@ -307,16 +213,12 @@ export default function CreateListingPage() {
           )}
         </div>
 
-        <div className="flex gap-4">
+        {/* Submit */}
+        <div className="flex gap-3 pt-2">
           <Button type="submit" className="flex-1" disabled={loading}>
             {loading ? <LoadingSpinner /> : "Publier l'annonce"}
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => router.back()}
-            className="flex-1"
-          >
+          <Button type="button" variant="secondary" onClick={() => router.back()}>
             Annuler
           </Button>
         </div>

@@ -24,6 +24,37 @@ class ModerationListingController extends Controller
     }
 
     /**
+     * GET /api/moderation/listings/{id}/note
+     * Get moderator note for a listing.
+     */
+    public function getNote(Listing $listing): JsonResponse
+    {
+        return response()->json(['note' => $listing->moderator_note ?? '']);
+    }
+
+    /**
+     * PUT /api/moderation/listings/{id}/note
+     * Save moderator note for a listing.
+     */
+    public function saveNote(Request $request, Listing $listing): JsonResponse
+    {
+        $request->validate(['note' => ['nullable', 'string', 'max:1000']]);
+        
+        $listing->update(['moderator_note' => $request->input('note')]);
+        
+        return response()->json(['message' => 'Note enregistrée.', 'note' => $listing->moderator_note]);
+    }
+
+    /**
+     * GET /api/moderation/listings/{id}/seller
+     * Get seller info for a listing.
+     */
+    public function getSeller(Listing $listing): JsonResponse
+    {
+        return response()->json(['seller' => $listing->user]);
+    }
+
+    /**
      * PUT /api/moderation/listings/{id}/approve
      * Approve a listing → status becomes "publiee".
      */

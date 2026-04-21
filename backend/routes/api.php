@@ -58,9 +58,7 @@ Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{listing}', [ListingController::class, 'show']);
 
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
-    // Requires verified email to create
-    Route::post('/listings', [ListingController::class, 'store'])
-        ->middleware('verified');
+    Route::post('/listings', [ListingController::class, 'store']);
 
     Route::put('/listings/{listing}', [ListingController::class, 'update']);
     Route::delete('/listings/{listing}', [ListingController::class, 'destroy']);

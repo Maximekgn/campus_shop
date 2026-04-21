@@ -120,7 +120,7 @@ return [
     |
     | These files and folders will be removed before the final bundle is
     | built for production. You may use glob/wildcard patterns here to
-    | skip unnecessary assets like logs, sessions, or temp data.
+    | skip unnecessary images like logs, sessions, or temp data.
     |
     */
 

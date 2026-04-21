@@ -10,6 +10,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
+        apiPrefix: 'api',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
@@ -17,14 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'role:moderateur' => EnsureUserIsModerator::class,
+            'cors' => \App\Http\Middleware\Cors::class,
         ]);
 
         // Note: statefulApi() removed - using Bearer tokens + CORS instead
         // This is for SPA (frontend on separate domain/port)
 
-        $middleware->api(append: [
+        $middleware->api(prepend: [
+            \App\Http\Middleware\Cors::class,
+        ], append: [
             \App\Http\Middleware\UpdateLastSeen::class,
-            \Fruitcake\Cors\HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

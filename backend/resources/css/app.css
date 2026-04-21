@@ -5,7 +5,14 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --color-gold: #C9A84C;
+    --color-gold-light: #FDF3DC;
+    --color-off-white: #F9F7F2;
+    --color-campus-dark: #1A1A1A;
+    --color-campus-gray: #7A7572;
+    --color-campus-border: #E8E4DC;
+    --color-reserved: #E07A2F;
+    --color-available: #3E8B5F;
 }

@@ -12,16 +12,8 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
     protected static ?string $password;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
         return [
@@ -29,8 +21,33 @@ class UserFactory extends Factory
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'role' => 'membre',
+            'student_id' => 'ETU' . fake()->unique()->numerify('######'),
+            'is_active' => true,
+            'ban_until' => null,
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Set user as moderator.
+     */
+    public function moderator(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'moderateur',
+        ]);
+    }
+
+    /**
+     * Set user as banned.
+     */
+    public function banned(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+            'ban_until' => now()->addDays(7),
+        ]);
     }
 
     /**

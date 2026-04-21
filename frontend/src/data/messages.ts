@@ -1,24 +1,22 @@
-import { Conversation, Message } from '../types';
-
-export const mockConversations: Conversation[] = [
+export const mockConversations = [
   {
-    id: 'c1',
-    listing_id: 'l1',
-    buyer_id: 'u3',
-    seller_id: 'u1',
+    id: 1,
+    listing_id: 1,
+    buyer_id: 3,
+    seller_id: 1,
     last_message_at: new Date().toISOString(),
     last_message: 'Est-ce que le livre est toujours disponible ?',
-    unread_count: 1
-  }
+    unread_count: 1,
+  },
 ];
 
-export const mockMessages: Message[] = [
+export const mockMessages = [
   {
-    id: 'm1',
-    conversation_id: 'c1',
-    sender_id: 'u3',
+    id: 1,
+    conversation_id: 1,
+    sender_id: 3,
     body: 'Est-ce que le livre est toujours disponible ?',
     read_at: null,
-    created_at: new Date().toISOString()
-  }
+    created_at: new Date().toISOString(),
+  },
 ];

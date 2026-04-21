@@ -1,83 +1,93 @@
-export enum UserRole {
-  MEMBER = 'member',
-  MODERATOR = 'moderator',
-}
+export const UserRole = {
+  MEMBER: 'membre',
+  MODERATOR: 'moderateur',
+} as const;
+
+export const ListingType = {
+  SALE: 'vente',
+  GIFT: 'don',
+  SWAP: 'échange',
+} as const;
+
+export const ListingStatus = {
+  PUBLISHED: 'publiée',
+  RESERVED: 'réservée',
+  SOLD: 'vendue',
+  ARCHIVED: 'archivée',
+} as const;
 
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
-  role: UserRole;
-  student_id: string;
-  is_active: boolean;
+  role: string;
+  student_id?: string;
+  is_active?: boolean;
+  email_verified_at?: string;
   created_at: string;
 }
 
-export enum ListingType {
-  SALE = 'vente',
-  GIFT = 'don',
-  SWAP = 'échange',
-}
-
-export enum ListingStatus {
-  PUBLISHED = 'publiée',
-  RESERVED = 'réservée',
-  SOLD = 'vendue',
-  ARCHIVED = 'archivée',
-}
-
 export interface ListingPhoto {
-  id: string;
-  listing_id: string;
+  id: number;
+  listing_id: number;
   path: string;
   order: number;
 }
 
 export interface Listing {
-  id: string;
-  user_id: string;
+  id: number;
+  user_id: number;
   title: string;
   description: string;
-  type: ListingType;
+  type: string;
   price: number | null;
-  status: ListingStatus;
+  status: string;
   views_count: number;
   photos: ListingPhoto[];
   user?: User;
+  categories?: Category[];
   created_at: string;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  icon?: string;
+}
+
 export interface Conversation {
-  id: string;
-  listing_id: string;
-  buyer_id: string;
-  seller_id: string;
+  id: number;
+  listing_id: number;
+  buyer_id: number;
+  seller_id: number;
   last_message_at: string;
   listing?: Listing;
   buyer?: User;
   seller?: User;
   last_message?: string;
   unread_count?: number;
+  messages?: Message[];
 }
 
 export interface Message {
-  id: string;
-  conversation_id: string;
-  sender_id: string;
+  id: number;
+  conversation_id: number;
+  sender_id: number;
   body: string;
   read_at: string | null;
   created_at: string;
 }
 
 export interface Favorite {
-  user_id: string;
-  listing_id: string;
+  user_id: number;
+  listing_id: number;
 }
 
 export interface Report {
-  id: string;
-  listing_id: string;
-  reporter_id: string;
+  id: number;
+  listing_id: number;
+  reporter_id: number;
   reason: string;
   status: 'pending' | 'resolved';
   created_at: string;
@@ -92,5 +102,6 @@ export interface RegisterCredentials {
   name: string;
   email: string;
   password: string;
-  student_id: string;
+  password_confirmation: string;
+  student_id?: string;
 }

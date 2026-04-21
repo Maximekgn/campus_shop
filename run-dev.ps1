@@ -10,6 +10,6 @@ Start-Process cmd -ArgumentList '/k "cd backend && php artisan serve"' -NoNewWin
 
 # Lancement du Frontend (Next.js avec Bun)
 Write-Host "[2/2] Lancement du Frontend (Next.js)..." -ForegroundColor Green
-Start-Process cmd -ArgumentList '/k "cd frontend && bun run dev"' -NoNewWindow:$false
+Start-Process cmd -ArgumentList '/k "cd frontend && npm run dev"' -NoNewWindow:$false
 
 Write-Host "`nLes deux terminaux ont été ouverts !" -ForegroundColor Gray

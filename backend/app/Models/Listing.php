@@ -22,6 +22,7 @@ class Listing extends Model
         'price',
         'status',
         'views_count',
+        'moderator_note',
     ];
 
     protected function casts(): array

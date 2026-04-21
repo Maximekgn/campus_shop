@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -48,8 +49,19 @@ Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'v
     ->middleware(['auth:sanctum', 'signed'])
     ->name('verification.verify');
 
+Route::get('/email/verify-notice', function () {
+    return response()->json(['message' => 'Veuillez vérifier votre email']);
+})->middleware(['auth:sanctum'])
+    ->name('verification.notice');
+
 Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
     ->middleware('auth:sanctum');
+
+// ──────────────────────────────────────────────
+// 5.1.1 Categories — /api/categories
+// ──────────────────────────────────────────────
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
 // ──────────────────────────────────────────────
 // 5.2 Listings — /api/listings
@@ -58,7 +70,9 @@ Route::get('/listings', [ListingController::class, 'index']);
 Route::get('/listings/{listing}', [ListingController::class, 'show']);
 
 Route::middleware(['auth:sanctum', 'active'])->group(function () {
+    // Requires verified email to create (temporarily disabled)
     Route::post('/listings', [ListingController::class, 'store']);
+    // ->middleware('verified');
 
     Route::put('/listings/{listing}', [ListingController::class, 'update']);
     Route::delete('/listings/{listing}', [ListingController::class, 'destroy']);
@@ -98,10 +112,13 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 // 5.5 Moderation — /api/moderation
 // ──────────────────────────────────────────────
 Route::prefix('moderation')
-    ->middleware(['auth:sanctum', 'active', 'role:moderator'])
+    ->middleware(['auth:sanctum', 'active', 'role:moderateur'])
     ->group(function () {
         // Listing moderation
         Route::get('/pending', [ModerationListingController::class, 'pending']);
+        Route::get('/listings/{listing}/note', [ModerationListingController::class, 'getNote']);
+        Route::put('/listings/{listing}/note', [ModerationListingController::class, 'saveNote']);
+        Route::get('/listings/{listing}/seller', [ModerationListingController::class, 'getSeller']);
         Route::put('/listings/{listing}/approve', [ModerationListingController::class, 'approve']);
         Route::put('/listings/{listing}/reject', [ModerationListingController::class, 'reject']);
 

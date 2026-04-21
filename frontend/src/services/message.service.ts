@@ -1,28 +1,26 @@
+import { api } from './api';
 import { Conversation, Message } from '../types';
-import { mockConversations, mockMessages } from '../data/messages';
 
 export const messageService = {
-  getConversations: async (): Promise<Conversation[]> => {
-    return mockConversations;
+  getConversations: async (perPage = 20) => {
+    return api.get(`/conversations?per_page=${perPage}`);
   },
-  getMessages: async (conversationId: string): Promise<Message[]> => {
-    return mockMessages.filter(m => m.conversation_id === conversationId);
+
+  getConversation: async (id: number) => {
+    const data = await api.get(`/conversations/${id}`);
+    return data.conversation as Conversation;
   },
-  sendMessage: async (conversationId: string, body: string): Promise<Message> => {
-    const newMessage: Message = {
-      id: Math.random().toString(),
-      conversation_id: conversationId,
-      sender_id: 'u1',
-      body,
-      read_at: null,
-      created_at: new Date().toISOString()
-    };
-    return newMessage;
+
+  createConversation: async (listingId: number) => {
+    return api.post('/conversations', { listing_id: listingId });
   },
-  startConversation: async (listingId: string, message: string): Promise<Conversation> => {
-    return mockConversations[0];
+
+  sendMessage: async (conversationId: number, body: string) => {
+    return api.post(`/conversations/${conversationId}/messages`, { body });
   },
-  markAsRead: async (conversationId: string): Promise<void> => {
-    console.log('Marked as read', conversationId);
-  }
+
+  getUnreadCount: async () => {
+    const data = await api.get('/conversations/unread-count');
+    return data.unread_count as number;
+  },
 };

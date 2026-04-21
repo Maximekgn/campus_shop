@@ -58,7 +58,7 @@ export default function RegisterPage(): ReactNode {
     }
 
     try {
-      const result = await register(formData.name, formData.email, formData.password);
+      const result = await register(formData.name, formData.email, formData.password, formData.student_id);
       if (!result.success) {
         setError(result.error ?? "Erreur lors de l'inscription");
         return;

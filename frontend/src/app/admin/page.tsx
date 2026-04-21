@@ -4,6 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
 import type { Listing } from '@/types';
+import { mockListings } from '@/data/listings';
 import { moderationService } from '@/services/moderation.service';
 
 export default function AdminDashboard(): ReactNode {
@@ -11,6 +12,7 @@ export default function AdminDashboard(): ReactNode {
   const [reportCount, setReportCount] = useState(0);
   const [usersCount, setUsersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -29,6 +31,12 @@ export default function AdminDashboard(): ReactNode {
         setReportCount(overview.openReportsCount);
         setUsersCount(overview.usersCount);
         setPendingListings(pending);
+      } catch (err) {
+        console.error('Failed to load admin data:', err);
+        setError(true);
+        setPendingListings(mockListings.filter((l) => l.status !== 'archivee').slice(0, 3) as Listing[]);
+        setReportCount(2);
+        setUsersCount(5);
       } finally {
         if (mounted) {
           setLoading(false);

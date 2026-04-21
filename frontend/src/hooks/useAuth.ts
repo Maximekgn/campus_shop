@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { mockUsers } from '@/data/users';
+import { authService } from '@/services/auth.service';
 
-interface AuthUser {
-  id: string;
+export interface AuthUser {
+  id: number;
   name: string;
   email: string;
   role: string;
@@ -20,51 +20,25 @@ export function useAuth() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const storedUser = localStorage.getItem('current_user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
+        const userData = await authService.getCurrentUser();
+        if (userData) {
+          setUser({ id: userData.id, name: userData.name, email: userData.email, role: userData.role });
           setIsAuthenticated(true);
-
-          const token = localStorage.getItem('auth_token') ?? `mock_token_${Date.now()}`;
-          document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-          document.cookie = `auth_role=${userData.role}; path=/; max-age=86400; SameSite=Lax`;
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
-      const matchedUser = mockUsers.find((user) => user.email.toLowerCase() === email.toLowerCase());
-      if (!matchedUser || !password.trim()) {
-        return { success: false, error: 'Identifiants invalides' };
-      }
-
-      const authUser: AuthUser = {
-        id: matchedUser.id,
-        name: matchedUser.name,
-        email: matchedUser.email,
-        role: matchedUser.role,
-      };
-
-      const token = 'mock_token_' + Date.now();
-      localStorage.setItem('current_user', JSON.stringify(authUser));
-      localStorage.setItem('auth_token', token);
-      document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = `auth_role=${authUser.role}; path=/; max-age=86400; SameSite=Lax`;
-      setUser(authUser);
+      const response = await authService.login({ email, password });
+      setUser({ id: response.user.id, name: response.user.name, email: response.user.email, role: response.user.role });
       setIsAuthenticated(true);
-      return { success: true, user: authUser };
+      return { success: true, user: response.user };
     } catch (error) {
       return { success: false, error: String(error) };
     } finally {
@@ -72,38 +46,20 @@ export function useAuth() {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('current_user');
-    localStorage.removeItem('auth_token');
-    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
-    document.cookie = 'auth_role=; path=/; max-age=0; SameSite=Lax';
+  const logout = async () => {
+    await authService.logout();
     setUser(null);
     setIsAuthenticated(false);
     router.push('/');
   };
 
-  const register = async (name: string, email: string, password: string) => {
+  const register = async (name: string, email: string, password: string, studentId?: string) => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      if (!password.trim()) {
-        return { success: false, error: 'Mot de passe requis' };
-      }
-
-      const mockUser: AuthUser = {
-        id: 'u_new',
-        name,
-        email,
-        role: 'member',
-      };
-
-      const token = 'mock_token_' + Date.now();
-      localStorage.setItem('current_user', JSON.stringify(mockUser));
-      localStorage.setItem('auth_token', token);
-      document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
-      document.cookie = 'auth_role=member; path=/; max-age=86400; SameSite=Lax';
-      setUser(mockUser);
+      const response = await authService.register({ name, email, password, student_id: studentId });
+      setUser({ id: response.user.id, name: response.user.name, email: response.user.email, role: response.user.role });
       setIsAuthenticated(true);
-      return { success: true, user: mockUser };
+      return { success: true, user: response.user };
     } catch (error) {
       return { success: false, error: String(error) };
     } finally {
@@ -111,12 +67,5 @@ export function useAuth() {
     }
   };
 
-  return {
-    user,
-    isLoading,
-    isAuthenticated,
-    login,
-    logout,
-    register,
-  };
+  return { user, isLoading, isAuthenticated, login, logout, register };
 }

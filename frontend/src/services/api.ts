@@ -1,31 +1,60 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
 
-type FetchOptions = RequestInit & {
-  data?: unknown;
-};
-
-async function apiFetch(path: string, options: FetchOptions = {}) {
-  const url = `${API_BASE}${path}`;
-  const headers = new Headers(options.headers ?? {
-    "Content-Type": "application/json",
-  });
-
-  const init: RequestInit = {
-    ...options,
-    headers,
-    body: options.data ? JSON.stringify(options.data) : options.body,
-  };
-
-  const response = await fetch(url, init);
-  if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
-  }
-  return response.status === 204 ? null : response.json();
+function getToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('auth_token');
 }
 
 export const api = {
-  get: (path: string) => apiFetch(path, { method: "GET" }),
-  post: (path: string, data: unknown) => apiFetch(path, { method: "POST", data }),
-  put: (path: string, data: unknown) => apiFetch(path, { method: "PUT", data }),
-  delete: (path: string) => apiFetch(path, { method: "DELETE" }),
+  get: async (path: string) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}${path}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+    return res.json();
+  },
+
+  post: async (path: string, data?: unknown) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+    return res.json();
+  },
+
+  put: async (path: string, data?: unknown) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+    return res.json();
+  },
+
+  delete: async (path: string) => {
+    const token = getToken();
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    });
+    if (!res.ok) throw new Error(`Error: ${res.status}`);
+  },
 };

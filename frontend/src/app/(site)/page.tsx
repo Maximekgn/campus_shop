@@ -54,7 +54,7 @@ export default function HomePage() {
   const currentListing = featuredListings[activeSlide] ?? mockListings[0];
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+    <div className="flex w-full flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
       <section className="overflow-hidden rounded-[34px] border border-[var(--color-border)] bg-[var(--color-surface)] shadow-[var(--color-shadow)]">
         <div className="grid gap-0 lg:grid-cols-[1.05fr_1fr]">
           <div className="relative p-8 sm:p-10 lg:p-12">

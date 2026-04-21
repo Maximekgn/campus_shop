@@ -31,11 +31,9 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex min-h-screen flex-col bg-[var(--color-background)] text-[var(--color-foreground)]">
+      <body className="flex  flex-col bg-background ">
         <ToastProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <main className="flex-1 max-w-7xl mx-auto">{children}</main>
           <ToastContainer />
         </ToastProvider>
       </body>

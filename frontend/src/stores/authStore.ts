@@ -7,7 +7,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   register: (name: string, email: string, password: string, passwordConfirmation: string, studentId?: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
@@ -29,7 +29,7 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: true, 
             isLoading: false 
           });
-          return { success: true };
+          return { success: true, user: response.user };
         } catch (error) {
           set({ isLoading: false });
           return { success: false, error: String(error) };

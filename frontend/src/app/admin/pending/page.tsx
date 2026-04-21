@@ -16,8 +16,8 @@ export default function PendingListingsPage(): ReactNode {
   const loadPendingListings = useCallback(async () => {
     setLoading(true);
     try {
-      const listings = await moderationService.getPendingListings();
-      setPendingListings(listings);
+      const result = await moderationService.getPendingListings();
+      setPendingListings(result.data || []);
     } catch {
       setError("Impossible de charger les annonces en attente.");
     } finally {

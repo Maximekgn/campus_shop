@@ -43,7 +43,7 @@ export const moderationService = {
 
   getPendingListingById: async (id: number): Promise<Listing | null> => {
     const allListings = await moderationService.getPendingListings();
-    return allListings.find((l) => l.id === id) || null;
+    return (allListings.data || []).find((l) => l.id === id) || null;
   },
 
   approveListing: async (id: number): Promise<boolean> => {

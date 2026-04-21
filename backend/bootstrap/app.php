@@ -19,8 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role:moderator' => EnsureUserIsModerator::class,
         ]);
 
-        // Sanctum stateful domains for SPA (if used with web frontend)
-        $middleware->statefulApi();
+        // Note: statefulApi() removed - using Bearer tokens + CORS instead
+        // This is for SPA (frontend on separate domain/port)
 
         $middleware->api(append: [
             \App\Http\Middleware\UpdateLastSeen::class,

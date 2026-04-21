@@ -1,7 +1,36 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import AdminSidebar from '@/components/layout/AdminSidebar';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
+  const { user, isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const [checked, setChecked] = useState(false);
+
+  useEffect(() => {
+    if (isLoading) return;
+    
+    if (!isAuthenticated || user?.role !== 'moderateur') {
+      router.push('/');
+      return;
+    }
+    
+    setChecked(true);
+  }, [isLoading, isAuthenticated, user, router]);
+
+  if (isLoading || !checked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full px-3 py-4 sm:px-4 sm:py-5 lg:px-6 lg:py-6">
       <div className="flex w-full flex-col gap-5 lg:flex-row lg:items-stretch lg:gap-6">

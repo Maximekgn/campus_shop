@@ -27,7 +27,7 @@ type WeekdayPoint = {
   value: number;
 };
 
-const weekdayLabels = ["L", "M", "M", "J", "V", "S", "D"];
+const weekdayLabels = ["L", "Ma", "Me", "J", "V", "S", "D"];
 const listingTypeLabels: Record<string, string> = {
   vente: "Vente",
   don: "Don",

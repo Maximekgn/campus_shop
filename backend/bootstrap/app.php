@@ -18,11 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
             'role:moderateur' => EnsureUserIsModerator::class,
-            'cors' => \App\Http\Middleware\Cors::class,
         ]);
-
-        // Note: statefulApi() removed - using Bearer tokens + CORS instead
-        // This is for SPA (frontend on separate domain/port)
 
         $middleware->api(prepend: [
             \App\Http\Middleware\Cors::class,

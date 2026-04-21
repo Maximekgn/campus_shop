@@ -21,16 +21,23 @@ export function middleware(request: NextRequest) {
 
   // Récupérer le token depuis les cookies
   const token = request.cookies.get('auth_token')?.value;
+  const role = request.cookies.get('auth_role')?.value;
   const isAuthenticated = !!token;
 
   // Si l'utilisateur est sur une route d'auth et est déjà connecté
   if (authRoutes.includes(pathname) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/my-listings', request.url));
+    const destination = role === 'moderator' ? '/admin' : '/my-listings';
+    return NextResponse.redirect(new URL(destination, request.url));
   }
 
   // Si l'utilisateur essaie d'accéder à une route protégée sans authentification
   if (protectedRoutes.some((route) => pathname.startsWith(route)) && !isAuthenticated) {
     return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  // Contrôle d'accès admin
+  if (pathname.startsWith('/admin') && role !== 'moderator') {
+    return NextResponse.redirect(new URL('/my-listings', request.url));
   }
 
   // Redirection pour les routes qui commencent par (dashboard)

@@ -10,7 +10,7 @@ export const mockListings: Listing[] = [
     price: 10000,
     status: ListingStatus.PUBLISHED,
     views_count: 42,
-    photos: [{ id: 'p1', listing_id: 'l1', path: 'https://picsum.photos/400/300', order: 1 }],
+    photos: [{ id: 'p1', listing_id: 'l1', path: 'https://picsum.photos/700/500?random=1', order: 1 }],
     created_at: new Date().toISOString(),
   },
   {
@@ -22,7 +22,7 @@ export const mockListings: Listing[] = [
     price: null,
     status: ListingStatus.PUBLISHED,
     views_count: 125,
-    photos: [{ id: 'p2', listing_id: 'l2', path: 'https://picsum.photos/400/300', order: 1 }],
+    photos: [{ id: 'p2', listing_id: 'l2', path: 'https://picsum.photos/700/500?random=2', order: 1 }],
     created_at: new Date().toISOString(),
   },
   {
@@ -34,7 +34,7 @@ export const mockListings: Listing[] = [
     price: 6500,
     status: ListingStatus.RESERVED,
     views_count: 18,
-    photos: [{ id: 'p3', listing_id: 'l3', path: 'https://picsum.photos/400/300', order: 1 }],
+    photos: [{ id: 'p3', listing_id: 'l3', path: 'https://picsum.photos/700/500?random=3', order: 1 }],
     created_at: new Date().toISOString(),
   }
 ];

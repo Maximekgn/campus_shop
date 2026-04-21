@@ -1,23 +1,61 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import { mockListings } from '@/data/listings';
 import type { Listing } from '@/types';
-import { ListingStatus } from '@/types';
+import { moderationService } from '@/services/moderation.service';
 
 export default function AdminDashboard(): ReactNode {
-  const pendingListings = (mockListings.filter((l) => l.status !== ListingStatus.ARCHIVED) || []) as Listing[];
-  const reportCount = 3; // Simulé
+  const [pendingListings, setPendingListings] = useState<Listing[]>([]);
+  const [reportCount, setReportCount] = useState(0);
+  const [usersCount, setUsersCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadAdminData = async () => {
+      try {
+        const [overview, pending] = await Promise.all([
+          moderationService.getOverview(),
+          moderationService.getPendingListings(),
+        ]);
+
+        if (!mounted) {
+          return;
+        }
+
+        setReportCount(overview.openReportsCount);
+        setUsersCount(overview.usersCount);
+        setPendingListings(pending);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadAdminData();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="w-full">
       {/* Header */}
       <div className="mb-10">
         <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">Tableau de bord modération</h1>
         <p className="mt-1 text-[var(--color-muted)]">Gère les annonces et les signalements</p>
       </div>
+
+      {loading && (
+        <div className="mb-6 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-muted)]">
+          Chargement des donnees de moderation...
+        </div>
+      )}
 
       {/* Stats */}
       <div className="mb-10 grid gap-4 sm:grid-cols-3">
@@ -42,7 +80,7 @@ export default function AdminDashboard(): ReactNode {
             Utilisateurs
           </p>
           <p className="mt-3 text-4xl font-bold text-[var(--color-foreground)]">
-            3
+            {usersCount}
           </p>
         </div>
       </div>

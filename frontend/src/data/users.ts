@@ -27,5 +27,14 @@ export const mockUsers: User[] = [
     student_id: 'STUD67890',
     is_active: true,
     created_at: new Date().toISOString(),
+  },
+  {
+    id: 'u4',
+    name: 'Colombel Kadissole',
+    email: 'colombekadissole@gmail.com',
+    role: UserRole.MEMBER,
+    student_id: 'STUD99999',
+    is_active: true,
+    created_at: new Date().toISOString(),
   }
 ];

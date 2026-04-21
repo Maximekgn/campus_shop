@@ -1,25 +1,72 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { mockUsers } from '@/data/users';
 import type { User } from '@/types';
+import { moderationService } from '@/services/moderation.service';
 
 export default function UsersPage(): ReactNode {
-  const users = mockUsers as User[];
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [listingCounters, setListingCounters] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadUsers = async () => {
+      try {
+        const [usersData, counters] = await Promise.all([
+          moderationService.getUsers(),
+          moderationService.getUserListingsCount(),
+        ]);
+
+        if (!mounted) {
+          return;
+        }
+
+        setUsers(usersData);
+        setListingCounters(counters);
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUsers();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    const activeUsers = users.filter((user) => user.is_active).length;
+    const bannedUsers = users.filter((user) => !user.is_active).length;
+    const moderators = users.filter((user) => user.role === 'moderator').length;
+
+    return { activeUsers, bannedUsers, moderators };
+  }, [users]);
+
+  const toggleUserStatus = async (userId: string) => {
+    await moderationService.toggleUserStatus(userId);
+    const refreshedUsers = await moderationService.getUsers();
+    setUsers(refreshedUsers);
+  };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="w-full">
       {/* Header */}
-      <div className="mb-8 flex items-center gap-4">
-        <Link href="/admin">
-          <button className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)]">← Retour</button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-semibold text-[var(--color-foreground)]">Gestion des membres</h1>
-          <p className="mt-1 text-[var(--color-muted)]">{users.length} membre(s) inscrit(s)</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-[var(--color-foreground)]">Gestion des membres</h1>
+        <p className="mt-1 text-[var(--color-muted)]">{users.length} membre(s) inscrit(s)</p>
       </div>
+
+      {loading && (
+        <div className="mb-6 rounded-[16px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4 text-sm text-[var(--color-muted)]">
+          Chargement des membres...
+        </div>
+      )}
 
       {/* Table */}
       <div className="overflow-x-auto rounded-[28px] border border-[var(--color-border)] bg-white">
@@ -49,15 +96,22 @@ export default function UsersPage(): ReactNode {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-[var(--color-foreground)]">
-                  <span className="font-semibold">1</span>
+                  <span className="font-semibold">{listingCounters[user.id] ?? 0}</span>
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex gap-2">
                     <button className="rounded-full border border-blue-500 px-3 py-1 text-sm font-semibold text-blue-600 transition hover:bg-blue-50">
                       Voir profil
                     </button>
-                    <button className="rounded-full border border-red-500 px-3 py-1 text-sm font-semibold text-red-600 transition hover:bg-red-50">
-                      Bannir
+                    <button
+                      onClick={() => toggleUserStatus(user.id)}
+                      className={`rounded-full px-3 py-1 text-sm font-semibold transition ${
+                        user.is_active
+                          ? 'border border-red-500 text-red-600 hover:bg-red-50'
+                          : 'border border-green-500 text-green-700 hover:bg-green-50'
+                      }`}
+                    >
+                      {user.is_active ? 'Bannir' : 'Réactiver'}
                     </button>
                   </div>
                 </td>
@@ -71,15 +125,15 @@ export default function UsersPage(): ReactNode {
       <div className="mt-10 grid gap-4 sm:grid-cols-3">
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6">
           <p className="text-sm font-semibold uppercase text-[var(--color-muted)]">Utilisateurs actifs</p>
-          <p className="mt-3 text-3xl font-bold text-[var(--color-primary)]">{users.length}</p>
+          <p className="mt-3 text-3xl font-bold text-[var(--color-primary)]">{stats.activeUsers}</p>
         </div>
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6">
           <p className="text-sm font-semibold uppercase text-[var(--color-muted)]">Bannies</p>
-          <p className="mt-3 text-3xl font-bold text-red-600">0</p>
+          <p className="mt-3 text-3xl font-bold text-red-600">{stats.bannedUsers}</p>
         </div>
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6">
           <p className="text-sm font-semibold uppercase text-[var(--color-muted)]">Modérateurs</p>
-          <p className="mt-3 text-3xl font-bold text-[var(--color-foreground)]">1</p>
+          <p className="mt-3 text-3xl font-bold text-[var(--color-foreground)]">{stats.moderators}</p>
         </div>
       </div>
     </div>

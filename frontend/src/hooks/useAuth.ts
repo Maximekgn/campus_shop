@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { mockUsers } from '@/data/users';
 
 interface AuthUser {
   id: string;
@@ -17,15 +18,17 @@ export function useAuth() {
   const router = useRouter();
 
   useEffect(() => {
-    // Simulé : récupérer l'utilisateur depuis le localStorage ou les cookies
     const checkAuth = async () => {
       try {
-        // TODO: Remplacer par un appel API réel
         const storedUser = localStorage.getItem('current_user');
         if (storedUser) {
           const userData = JSON.parse(storedUser);
           setUser(userData);
           setIsAuthenticated(true);
+
+          const token = localStorage.getItem('auth_token') ?? `mock_token_${Date.now()}`;
+          document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+          document.cookie = `auth_role=${userData.role}; path=/; max-age=86400; SameSite=Lax`;
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -41,18 +44,27 @@ export function useAuth() {
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // TODO: Appel API réel
-      const mockUser: AuthUser = {
-        id: 'u1',
-        name: 'Jean Dupont',
-        email,
-        role: 'member',
+
+      const matchedUser = mockUsers.find((user) => user.email.toLowerCase() === email.toLowerCase());
+      if (!matchedUser || !password.trim()) {
+        return { success: false, error: 'Identifiants invalides' };
+      }
+
+      const authUser: AuthUser = {
+        id: matchedUser.id,
+        name: matchedUser.name,
+        email: matchedUser.email,
+        role: matchedUser.role,
       };
-      localStorage.setItem('current_user', JSON.stringify(mockUser));
-      localStorage.setItem('auth_token', 'mock_token_' + Date.now());
-      setUser(mockUser);
+
+      const token = 'mock_token_' + Date.now();
+      localStorage.setItem('current_user', JSON.stringify(authUser));
+      localStorage.setItem('auth_token', token);
+      document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = `auth_role=${authUser.role}; path=/; max-age=86400; SameSite=Lax`;
+      setUser(authUser);
       setIsAuthenticated(true);
-      return { success: true };
+      return { success: true, user: authUser };
     } catch (error) {
       return { success: false, error: String(error) };
     } finally {
@@ -63,6 +75,8 @@ export function useAuth() {
   const logout = () => {
     localStorage.removeItem('current_user');
     localStorage.removeItem('auth_token');
+    document.cookie = 'auth_token=; path=/; max-age=0; SameSite=Lax';
+    document.cookie = 'auth_role=; path=/; max-age=0; SameSite=Lax';
     setUser(null);
     setIsAuthenticated(false);
     router.push('/');
@@ -71,18 +85,25 @@ export function useAuth() {
   const register = async (name: string, email: string, password: string) => {
     try {
       setIsLoading(true);
-      // TODO: Appel API réel
+      if (!password.trim()) {
+        return { success: false, error: 'Mot de passe requis' };
+      }
+
       const mockUser: AuthUser = {
         id: 'u_new',
         name,
         email,
         role: 'member',
       };
+
+      const token = 'mock_token_' + Date.now();
       localStorage.setItem('current_user', JSON.stringify(mockUser));
-      localStorage.setItem('auth_token', 'mock_token_' + Date.now());
+      localStorage.setItem('auth_token', token);
+      document.cookie = `auth_token=${token}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = 'auth_role=member; path=/; max-age=86400; SameSite=Lax';
       setUser(mockUser);
       setIsAuthenticated(true);
-      return { success: true };
+      return { success: true, user: mockUser };
     } catch (error) {
       return { success: false, error: String(error) };
     } finally {

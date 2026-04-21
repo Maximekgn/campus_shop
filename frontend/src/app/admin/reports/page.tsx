@@ -1,48 +1,45 @@
 'use client';
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
 import { mockListings } from '@/data/listings';
-
-interface Report {
-  id: string;
-  listing_id: string;
-  reason: string;
-  reporter_id: string;
-  status: 'open' | 'resolved' | 'dismissed';
-  created_at: string;
-}
-
-const mockReports: Report[] = [
-  {
-    id: 'r1',
-    listing_id: 'l2',
-    reason: 'Contenu inapproprié',
-    reporter_id: 'u2',
-    status: 'open',
-    created_at: '2024-01-18T10:30:00',
-  },
-  {
-    id: 'r2',
-    listing_id: 'l3',
-    reason: 'Prix non compétitif',
-    reporter_id: 'u1',
-    status: 'open',
-    created_at: '2024-01-17T14:15:00',
-  },
-  {
-    id: 'r3',
-    listing_id: 'l1',
-    reason: 'Photo trompeuse',
-    reporter_id: 'u3',
-    status: 'resolved',
-    created_at: '2024-01-16T09:45:00',
-  },
-];
+import { AdminReport, moderationService } from '@/services/moderation.service';
 
 export default function ReportsPage(): ReactNode {
-  const [reports, setReports] = useState<Report[]>(mockReports);
+  const [reports, setReports] = useState<AdminReport[]>([]);
+  const [activeFilter, setActiveFilter] = useState<'all' | 'open' | 'resolved'>('all');
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadReports = async () => {
+      try {
+        const data = await moderationService.getReports();
+        if (mounted) {
+          setReports(data);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadReports();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const visibleReports = useMemo(() => {
+    if (activeFilter === 'all') {
+      return reports;
+    }
+    return reports.filter((report) => report.status === activeFilter);
+  }, [activeFilter, reports]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -57,44 +54,80 @@ export default function ReportsPage(): ReactNode {
     }
   };
 
-  const handleResolve = (reportId: string) => {
-    setReports(reports.map((r) => (r.id === reportId ? { ...r, status: 'resolved' as const } : r)));
+  const handleResolve = async (reportId: string) => {
+    setBusyId(reportId);
+    try {
+      await moderationService.resolveReport(reportId, 'mask');
+      setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: 'resolved' as const } : r)));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDismiss = async (reportId: string) => {
+    setBusyId(reportId);
+    try {
+      await moderationService.resolveReport(reportId, 'dismiss');
+      setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: 'dismissed' as const } : r)));
+    } finally {
+      setBusyId(null);
+    }
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="w-full">
       {/* Header */}
-      <div className="mb-8 flex items-center gap-4">
-        <Link href="/admin">
-          <button className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)]">← Retour</button>
-        </Link>
-        <div>
-          <h1 className="text-3xl font-semibold text-[var(--color-foreground)]">Signalements</h1>
-          <p className="mt-1 text-[var(--color-muted)]">{reports.filter((r) => r.status === 'open').length} ouvert(s)</p>
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-semibold text-[var(--color-foreground)]">Signalements</h1>
+        <p className="mt-1 text-[var(--color-muted)]">{reports.filter((r) => r.status === 'open').length} ouvert(s)</p>
       </div>
 
       {/* Filters */}
       <div className="mb-6 flex gap-2">
-        <button className="rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] px-4 py-2 font-semibold text-[var(--color-primary)]">
+        <button
+          onClick={() => setActiveFilter('all')}
+          className={`rounded-full px-4 py-2 font-semibold transition ${
+            activeFilter === 'all'
+              ? 'border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+              : 'border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-soft)]'
+          }`}
+        >
           Tous
         </button>
-        <button className="rounded-full border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)]">
+        <button
+          onClick={() => setActiveFilter('open')}
+          className={`rounded-full px-4 py-2 font-semibold transition ${
+            activeFilter === 'open'
+              ? 'border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+              : 'border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-soft)]'
+          }`}
+        >
           Ouverts
         </button>
-        <button className="rounded-full border border-[var(--color-border)] px-4 py-2 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)]">
+        <button
+          onClick={() => setActiveFilter('resolved')}
+          className={`rounded-full px-4 py-2 font-semibold transition ${
+            activeFilter === 'resolved'
+              ? 'border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
+              : 'border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-soft)]'
+          }`}
+        >
           Résolus
         </button>
       </div>
 
       {/* List */}
       <div className="space-y-4">
-        {reports.length === 0 ? (
+        {loading ? (
+          <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8 text-center">
+            <p className="text-[var(--color-muted)]">Chargement des signalements...</p>
+          </div>
+        ) : visibleReports.length === 0 ? (
           <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8 text-center">
             <p className="text-[var(--color-muted)]">Aucun signalement</p>
           </div>
         ) : (
-          reports.map((report) => {
+          visibleReports.map((report) => {
             const listing = mockListings.find((l) => l.id === report.listing_id);
             return (
               <div key={report.id} className="rounded-[28px] border border-[var(--color-border)] bg-white p-6">
@@ -114,10 +147,18 @@ export default function ReportsPage(): ReactNode {
                 </div>
 
                 <div className="flex gap-3">
-                  <button className="rounded-full border border-green-500 px-6 py-2 font-semibold text-green-600 transition hover:bg-green-50">
-                    ✓ Marquer résolu
+                  <button
+                    onClick={() => handleResolve(report.id)}
+                    disabled={busyId === report.id || report.status !== 'open'}
+                    className="rounded-full border border-green-500 px-6 py-2 font-semibold text-green-600 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {busyId === report.id ? 'Traitement...' : '✓ Marquer résolu'}
                   </button>
-                  <button className="rounded-full border border-[var(--color-border)] px-6 py-2 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)]">
+                  <button
+                    onClick={() => handleDismiss(report.id)}
+                    disabled={busyId === report.id || report.status !== 'open'}
+                    className="rounded-full border border-[var(--color-border)] px-6 py-2 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
                     Ignorer
                   </button>
                   <Link href={`/listings/${report.listing_id}`}>

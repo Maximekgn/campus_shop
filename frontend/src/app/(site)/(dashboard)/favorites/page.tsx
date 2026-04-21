@@ -8,7 +8,7 @@ import type { Listing } from '@/types';
 
 export default function FavoritesPage(): ReactNode {
   // Simulation : annonces 1 et 3 sont en favori
-  const favoriteIds = ['l1', 'l3'];
+  const favoriteIds = [1, 3];
   const favoriteListings = mockListings.filter((l) => favoriteIds.includes(l.id)) as Listing[];
 
   return (

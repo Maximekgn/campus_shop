@@ -61,7 +61,7 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
     } catch (err) {
       console.error("Failed to fetch listing:", err);
       setError(true);
-      const found = mockListings.find((l) => l.id === id) as
+      const found = mockListings.find((l) => l.id === Number(id)) as
         | Listing
         | undefined;
       setListing(found || null);

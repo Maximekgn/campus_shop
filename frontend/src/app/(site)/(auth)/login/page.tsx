@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage(): ReactNode {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export default function LoginPage(): ReactNode {
         setError(result.error ?? "Erreur de connexion");
         return;
       }
-      if (result.user?.role === "moderator") {
+      if (user?.role === "moderator") {
         router.push("/admin");
       } else {
         router.push("/my-listings");

@@ -5,11 +5,11 @@ import { Check, Shield, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { mockUsers } from "@/data/users";
-import type { User } from "@/types";
+import type { User as UserType } from "@/types";
 
 export default function ProfilePage(): ReactNode {
   // Simulation de l'utilisateur connecté (u1)
-  const currentUser = mockUsers[0] as User;
+  const currentUser = mockUsers[0] as UserType;
 
   const [formData, setFormData] = useState({
     name: currentUser.name,

@@ -93,10 +93,12 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
   };
 
   const handleReport = () => {
-    const reason = prompt("Reason for reporting this listing:");
-    if (reason) {
-      console.log("Report submitted:", reason);
-      alert("Signalement envoyé !");
+    router.push(`/report/${listing.id}`);
+  };
+
+  const handleSellerClick = () => {
+    if (seller?.id) {
+      router.push(`/users/${seller.id}`);
     }
   };
 
@@ -181,7 +183,10 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
           </div>
 
           {seller && (
-            <div className="rounded-[20px] border border-[var(--color-border)] bg-white p-5">
+            <div 
+              className="rounded-[20px] border border-[var(--color-border)] bg-white p-5 cursor-pointer hover:border-[var(--color-primary)] transition"
+              onClick={handleSellerClick}
+            >
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
                 Vendeur
               </p>

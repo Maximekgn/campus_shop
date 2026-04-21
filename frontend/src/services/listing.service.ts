@@ -58,4 +58,12 @@ export const listingService = {
   getFavorites: async (perPage = 15) => {
     return api.get(`/favorites?per_page=${perPage}`);
   },
+
+  toggleStatus: async (id: number, status: string) => {
+    return api.put(`/listings/${id}/status`, { status });
+  },
+
+  report: async (id: number, reason: string) => {
+    return api.post(`/listings/${id}/report`, { reason });
+  },
 };

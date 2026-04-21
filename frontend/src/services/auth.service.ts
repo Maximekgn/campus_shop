@@ -13,7 +13,10 @@ export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify(credentials),
     });
     if (!res.ok) {
@@ -28,7 +31,10 @@ export const authService = {
   register: async (data: RegisterCredentials): Promise<AuthResponse> => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -46,7 +52,10 @@ export const authService = {
       try {
         await fetch(`${API_BASE}/auth/logout`, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            'Accept': 'application/json',
+            Authorization: `Bearer ${token}` 
+          },
         });
       } finally {
         localStorage.removeItem('auth_token');

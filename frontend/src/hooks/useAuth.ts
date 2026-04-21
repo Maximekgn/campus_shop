@@ -53,10 +53,10 @@ export function useAuth() {
     router.push('/');
   };
 
-  const register = async (name: string, email: string, password: string, studentId?: string) => {
+  const register = async (name: string, email: string, password: string, passwordConfirmation: string, studentId?: string) => {
     setIsLoading(true);
     try {
-      const response = await authService.register({ name, email, password, student_id: studentId });
+      const response = await authService.register({ name, email, password, password_confirmation: passwordConfirmation, student_id: studentId });
       setUser({ id: response.user.id, name: response.user.name, email: response.user.email, role: response.user.role });
       setIsAuthenticated(true);
       return { success: true, user: response.user };

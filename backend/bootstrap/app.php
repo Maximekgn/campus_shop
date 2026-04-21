@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->api(append: [
             \App\Http\Middleware\UpdateLastSeen::class,
+            \Fruitcake\Cors\HandleCors::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

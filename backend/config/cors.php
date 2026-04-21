@@ -16,13 +16,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'http://localhost:3000',        // Next.js dev frontend
-        'http://127.0.0.1:3000',        // Alternative localhost
-        'http://localhost:5173',        // Vite dev server (if used)
-        // Add production domains here later
-        // 'https://campusshop.com',
-    ],
+    'allowed_origins' => ['*'],
 
     'allowed_origins_patterns' => [],
 
@@ -32,6 +26,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false,
 
 ];

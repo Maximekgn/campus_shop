@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ConversationController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\FavoriteController;
@@ -50,6 +51,12 @@ Route::post('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'v
 
 Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
     ->middleware('auth:sanctum');
+
+// ──────────────────────────────────────────────
+// 5.1.1 Categories — /api/categories
+// ──────────────────────────────────────────────
+Route::get('/categories', [CategoryController::class, 'index']);
+Route::get('/categories/{category}', [CategoryController::class, 'show']);
 
 // ──────────────────────────────────────────────
 // 5.2 Listings — /api/listings

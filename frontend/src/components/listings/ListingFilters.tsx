@@ -1,22 +1,26 @@
-'use client';
+"use client";
 
-import { ChangeEvent, useState, useEffect } from 'react';
-import { categoryService, Category } from '@/services/category.service';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import { ListingFilters as Filters } from '@/services/listing.service';
+import { ChangeEvent, useState, useEffect } from "react";
+import { categoryService, Category } from "@/services/category.service";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import { ListingFilters as Filters } from "@/services/listing.service";
 
-export default function ListingFilters({ onFilter }: { onFilter: (filters: Filters) => void }) {
+export default function ListingFilters({
+  onFilter,
+}: {
+  onFilter: (filters: Filters) => void;
+}) {
   const [filters, setFilters] = useState<{
     q: string;
     type: string;
     price_max: string;
     categories: string;
   }>({
-    q: '',
-    type: '',
-    price_max: '',
-    categories: '',
+    q: "",
+    type: "",
+    price_max: "",
+    categories: "",
   });
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -29,14 +33,16 @@ export default function ListingFilters({ onFilter }: { onFilter: (filters: Filte
     setFilters(updated);
     onFilter({
       q: updated.q || undefined,
-      type: (updated.type as Filters['type']) || undefined,
-      price_max: updated.price_max ? parseInt(updated.price_max, 10) : undefined,
+      type: (updated.type as Filters["type"]) || undefined,
+      price_max: updated.price_max
+        ? parseInt(updated.price_max, 10)
+        : undefined,
       categories: updated.categories || undefined,
     });
   };
 
   const handleReset = () => {
-    const empty = { q: '', type: '', price_max: '', categories: '' };
+    const empty = { q: "", type: "", price_max: "", categories: "" };
     setFilters(empty);
     onFilter({});
   };
@@ -51,11 +57,15 @@ export default function ListingFilters({ onFilter }: { onFilter: (filters: Filte
           type="text"
           placeholder="Rechercher..."
           value={filters.q}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange('q', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            handleChange("q", e.target.value)
+          }
         />
         <select
           value={filters.type}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleChange('type', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+            handleChange("type", e.target.value)
+          }
           className="rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
         >
           <option value="">Tous les types</option>
@@ -65,7 +75,9 @@ export default function ListingFilters({ onFilter }: { onFilter: (filters: Filte
         </select>
         <select
           value={filters.categories}
-          onChange={(e: ChangeEvent<HTMLSelectElement>) => handleChange('categories', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+            handleChange("categories", e.target.value)
+          }
           className="rounded-2xl border border-[var(--color-border)] bg-white px-4 py-3 text-sm text-[var(--color-foreground)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary-soft)]"
         >
           <option value="">Toutes catégories</option>
@@ -79,7 +91,9 @@ export default function ListingFilters({ onFilter }: { onFilter: (filters: Filte
           type="number"
           placeholder="Prix max (FCFA)"
           value={filters.price_max}
-          onChange={(e: ChangeEvent<HTMLInputElement>) => handleChange('price_max', e.target.value)}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            handleChange("price_max", e.target.value)
+          }
         />
         <Button variant="secondary" onClick={handleReset}>
           Réinitialiser

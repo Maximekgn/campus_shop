@@ -1,32 +1,32 @@
-'use client';
+"use client";
 
-import { ChangeEvent, FormEvent, useState, ReactNode } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { useAuth } from '@/hooks/useAuth';
+import { ChangeEvent, FormEvent, useState, ReactNode } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import {Input} from "@/components/ui/Input";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage(): ReactNode {
   const router = useRouter();
   const { login } = useAuth();
-  const [formData, setFormData] = useState({ email: '', password: '' });
-  const [error, setError] = useState<string>('');
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     if (!formData.email || !formData.password) {
-      setError('Tous les champs sont requis');
+      setError("Tous les champs sont requis");
       setLoading(false);
       return;
     }
@@ -34,16 +34,16 @@ export default function LoginPage(): ReactNode {
     try {
       const result = await login(formData.email, formData.password);
       if (!result.success) {
-        setError(result.error ?? 'Erreur de connexion');
+        setError(result.error ?? "Erreur de connexion");
         return;
       }
-      if (result.user?.role === 'moderator') {
-        router.push('/admin');
+      if (result.user?.role === "moderator") {
+        router.push("/admin");
       } else {
-        router.push('/my-listings');
+        router.push("/my-listings");
       }
     } catch {
-      setError('Erreur de connexion');
+      setError("Erreur de connexion");
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,10 @@ export default function LoginPage(): ReactNode {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Email
             </label>
             <Input
@@ -86,7 +89,10 @@ export default function LoginPage(): ReactNode {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Mot de passe
             </label>
             <Input
@@ -101,15 +107,18 @@ export default function LoginPage(): ReactNode {
           </div>
 
           <Button className="w-full" disabled={loading}>
-            {loading ? 'Connexion...' : 'Se connecter'}
+            {loading ? "Connexion..." : "Se connecter"}
           </Button>
         </form>
 
         {/* Lien inscription */}
         <div className="text-center">
           <p className="text-sm text-[var(--color-muted)]">
-            Pas encore inscrit ?{' '}
-            <Link href="/register" className="font-semibold text-[var(--color-primary-dark)] hover:text-[var(--color-primary)]">
+            Pas encore inscrit ?{" "}
+            <Link
+              href="/register"
+              className="font-semibold text-[var(--color-primary-dark)] hover:text-[var(--color-primary)]"
+            >
               Créer un compte
             </Link>
           </p>
@@ -118,11 +127,11 @@ export default function LoginPage(): ReactNode {
         {/* Info */}
         <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <p className="text-xs text-[var(--color-muted)]">
-            Compte etudiant ou moderateur requis pour acceder a l'espace CampusShop.
+            Compte etudiant ou moderateur requis pour acceder a l'espace
+            CampusShop.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

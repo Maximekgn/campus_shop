@@ -1,24 +1,35 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import ListingFilters from '@/components/listings/ListingFilters';
-import ListingCard from '@/components/listings/ListingCard';
-import { listingService, ListingFilters as Filters } from '@/services/listing.service';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { mockListings } from '@/data/listings';
-import type { Listing } from '@/types';
+import { useState, useEffect } from "react";
+import ListingFilters from "@/components/listings/ListingFilters";
+import ListingCard from "@/components/listings/ListingCard";
+import {
+  listingService,
+  ListingFilters as Filters,
+} from "@/services/listing.service";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
+import { mockListings } from "@/data/listings";
+import type { Listing } from "@/types";
 
 export default function ListingsPage() {
   const [filters, setFilters] = useState<Filters>({});
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, last_page: 1, total: 0 });
+  const [pagination, setPagination] = useState({
+    page: 1,
+    last_page: 1,
+    total: 0,
+  });
 
   const fetchListings = async (page = 1) => {
     setLoading(true);
     try {
-      const data = await listingService.getAll({ ...filters, page, per_page: 15 });
+      const data = await listingService.getAll({
+        ...filters,
+        page,
+        per_page: 15,
+      });
       setListings(data.data || data);
       setPagination({
         page: data.current_page || page,
@@ -27,7 +38,7 @@ export default function ListingsPage() {
       });
       setError(false);
     } catch (err) {
-      console.error('Failed to fetch listings:', err);
+      console.error("Failed to fetch listings:", err);
       setError(true);
       setListings(mockListings as Listing[]);
       setPagination({ page: 1, last_page: 1, total: mockListings.length });
@@ -48,9 +59,12 @@ export default function ListingsPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-10">
-        <h1 className="mb-2 text-4xl font-semibold text-[var(--color-foreground)]">Annonces</h1>
+        <h1 className="mb-2 text-4xl font-semibold text-[var(--color-foreground)]">
+          Annonces
+        </h1>
         <p className="text-[var(--color-muted)]">
-          {pagination.total} annonce{pagination.total > 1 ? 's' : ''} trouvée{pagination.total > 1 ? 's' : ''}
+          {pagination.total} annonce{pagination.total > 1 ? "s" : ""} trouvée
+          {pagination.total > 1 ? "s" : ""}
         </p>
       </div>
 
@@ -64,7 +78,9 @@ export default function ListingsPage() {
         </div>
       ) : listings.length === 0 ? (
         <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] py-16 text-center">
-          <p className="text-lg text-[var(--color-muted)]">Aucune annonce ne correspond à tes critères.</p>
+          <p className="text-lg text-[var(--color-muted)]">
+            Aucune annonce ne correspond à tes critères.
+          </p>
         </div>
       ) : (
         <>

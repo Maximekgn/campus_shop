@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AboutPage(): ReactNode {
@@ -9,7 +10,7 @@ export default function AboutPage(): ReactNode {
       {/* Header */}
       <div className="mb-10">
         <Link href="/">
-          <button className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] mb-4">← Retour</button>
+          <button className="flex items-center text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] mb-4"><ArrowLeft className="mr-1 h-4 w-4" /> Retour</button>
         </Link>
         <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">À propos de CampusShop</h1>
       </div>
@@ -28,19 +29,19 @@ export default function AboutPage(): ReactNode {
           <h2 className="text-2xl font-semibold text-[var(--color-foreground)] mb-3">Nos valeurs</h2>
           <ul className="space-y-2">
             <li className="flex gap-2">
-              <span className="text-[var(--color-primary)]">✓</span>
+              <Check className="h-4 w-4 text-[var(--color-primary)]" />
               <span className="text-[var(--color-muted)]"><strong>Confiance :</strong> Une communauté vérifiée et modérée</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-[var(--color-primary)]">✓</span>
+              <Check className="h-4 w-4 text-[var(--color-primary)]" />
               <span className="text-[var(--color-muted)]"><strong>Simplicité :</strong> Interface intuitive et facile d'utilisation</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-[var(--color-primary)]">✓</span>
+              <Check className="h-4 w-4 text-[var(--color-primary)]" />
               <span className="text-[var(--color-muted)]"><strong>Économie :</strong> Échanges équitables et transparents</span>
             </li>
             <li className="flex gap-2">
-              <span className="text-[var(--color-primary)]">✓</span>
+              <Check className="h-4 w-4 text-[var(--color-primary)]" />
               <span className="text-[var(--color-muted)]"><strong>Communauté :</strong> Entraide entre étudiants</span>
             </li>
           </ul>

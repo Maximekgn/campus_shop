@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { Listing } from '@/types';
 import { listingService } from '@/services/listing.service';
 import Link from 'next/link';
+import { Package, Heart, Eye, ArrowRight } from 'lucide-react';
 
 type ListingCardProps = {
   listing: Partial<Listing>;
@@ -55,7 +56,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
             <img src={photo} alt={listing.title} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full items-center justify-center text-4xl text-[var(--color-primary)]">
-              📦
+              <Package className="h-12 w-12" />
             </div>
           )}
           <div className="absolute right-2 top-2 flex gap-2">
@@ -63,7 +64,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               onClick={handleFavorite}
               className="rounded-full bg-white/90 p-2 shadow transition hover:scale-110"
             >
-              {isFavorited ? '❤️' : '🤍'}
+              <Heart className={`h-5 w-5 ${isFavorited ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
             </button>
           </div>
           {isNewListing && (
@@ -94,7 +95,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
               <span className="block text-lg font-semibold text-[var(--color-primary-dark)]">
                 {listing.price != null ? `${listing.price} FCFA` : 'Gratuit'}
               </span>
-              <span className="text-xs text-[var(--color-muted)]">👁 {listing.views_count ?? 0} vues</span>
+              <span className="text-xs text-[var(--color-muted)] flex items-center gap-1"><Eye className="h-3 w-3" /> {listing.views_count ?? 0} vues</span>
             </div>
             <button
               className={`rounded-full px-4 py-2 text-sm font-semibold transition ${

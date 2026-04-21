@@ -1,20 +1,25 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import { ReactNode } from "react";
+import { Search } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function NotFoundPage(): ReactNode {
   return (
     <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
       {/* 404 Icon */}
       <div className="mb-6 text-center">
-        <span className="text-9xl font-bold text-[var(--color-primary)]">404</span>
+        <span className="text-9xl font-bold text-[var(--color-primary)]">
+          404
+        </span>
       </div>
 
       {/* Content */}
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-[var(--color-foreground)]">Page non trouvée</h1>
+        <h1 className="text-4xl font-bold text-[var(--color-foreground)]">
+          Page non trouvée
+        </h1>
         <p className="mt-4 text-lg text-[var(--color-muted)]">
           Désolé, la page que tu cherches n'existe pas ou a été supprimée.
         </p>
@@ -25,8 +30,10 @@ export default function NotFoundPage(): ReactNode {
 
       {/* Illustration */}
       <div className="mt-8 rounded-[28px] border border-[var(--color-border)] bg-[var(--color-soft)] p-12">
-        <span className="text-6xl">🔍</span>
-        <p className="mt-4 text-sm text-[var(--color-muted)]">Rien à voir ici...</p>
+        <Search className="mx-auto h-12 w-12 text-[var(--color-muted)]" />
+        <p className="mt-4 text-sm text-[var(--color-muted)]">
+          Rien à voir ici...
+        </p>
       </div>
 
       {/* Actions */}

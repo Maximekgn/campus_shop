@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, ReactNode } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import type { ListingPhoto } from '@/types';
 
@@ -102,7 +103,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps): ReactNode {
                 onClick={handlePrevious}
                 className="rounded-full bg-white/20 px-6 py-3 font-semibold text-white transition hover:bg-white/30"
               >
-                ← Précédent
+                <ChevronLeft className="mr-1 h-4 w-4" /> Précédent
               </button>
               <span className="text-sm font-semibold text-white">
                 {currentPhotoIndex + 1} / {photos.length}
@@ -111,7 +112,7 @@ export default function PhotoGallery({ photos }: PhotoGalleryProps): ReactNode {
                 onClick={handleNext}
                 className="rounded-full bg-white/20 px-6 py-3 font-semibold text-white transition hover:bg-white/30"
               >
-                Suivant →
+                Suivant <ChevronRight className="ml-1 h-4 w-4" />
               </button>
             </div>
           </div>

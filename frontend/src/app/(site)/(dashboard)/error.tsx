@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import { ReactNode } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 
 export default function DashboardErrorPage(): ReactNode {
   return (
@@ -12,7 +12,9 @@ export default function DashboardErrorPage(): ReactNode {
       </div>
 
       <div className="text-center">
-        <h1 className="text-4xl font-bold text-[var(--color-foreground)]">Erreur du tableau de bord</h1>
+        <h1 className="text-4xl font-bold text-[var(--color-foreground)]">
+          Erreur du tableau de bord
+        </h1>
         <p className="mt-4 text-lg text-[var(--color-muted)]">
           Une erreur s'est produite dans ton espace personnel.
         </p>

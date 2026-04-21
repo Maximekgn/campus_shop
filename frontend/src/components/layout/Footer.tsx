@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Mail, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -57,8 +58,8 @@ export default function Footer() {
           <div>
             <h3 className="font-semibold text-[var(--color-foreground)]">Support</h3>
             <ul className="mt-3 space-y-2 text-sm">
-              <li className="text-[var(--color-muted)]">📧 support@campusshop.tg</li>
-              <li className="text-[var(--color-muted)]">📍 Lomé, Togo</li>
+              <li className="flex items-center gap-2 text-[var(--color-muted)]"><Mail className="h-4 w-4" /> support@campusshop.tg</li>
+              <li className="flex items-center gap-2 text-[var(--color-muted)]"><MapPin className="h-4 w-4" /> Lomé, Togo</li>
             </ul>
           </div>
         </div>

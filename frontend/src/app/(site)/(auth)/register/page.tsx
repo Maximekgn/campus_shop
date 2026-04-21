@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { ChangeEvent, FormEvent, useState, ReactNode } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { useAuth } from '@/hooks/useAuth';
+import { ChangeEvent, FormEvent, useState, ReactNode } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useAuth } from "@/hooks/useAuth";
 
 type RegisterFormData = {
   name: string;
@@ -19,53 +19,64 @@ export default function RegisterPage(): ReactNode {
   const router = useRouter();
   const { register } = useAuth();
   const [formData, setFormData] = useState<RegisterFormData>({
-    name: '',
-    email: '',
-    student_id: '',
-    password: '',
-    password_confirmation: '',
+    name: "",
+    email: "",
+    student_id: "",
+    password: "",
+    password_confirmation: "",
   });
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
-    if (!formData.name || !formData.email || !formData.password || !formData.student_id) {
-      setError('Tous les champs sont requis');
+    if (
+      !formData.name ||
+      !formData.email ||
+      !formData.password ||
+      !formData.student_id
+    ) {
+      setError("Tous les champs sont requis");
       setLoading(false);
       return;
     }
 
     if (formData.password !== formData.password_confirmation) {
-      setError('Les mots de passe ne correspondent pas');
+      setError("Les mots de passe ne correspondent pas");
       setLoading(false);
       return;
     }
 
     if (formData.password.length < 8) {
-      setError('Le mot de passe doit contenir au moins 8 caractères');
+      setError("Le mot de passe doit contenir au moins 8 caractères");
       setLoading(false);
       return;
     }
 
     try {
-      const result = await register(formData.name, formData.email, formData.password, formData.password_confirmation, formData.student_id);
+      const result = await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.password_confirmation,
+        formData.student_id,
+      );
       if (!result.success) {
         setError(result.error ?? "Erreur lors de l'inscription");
         return;
       }
-      router.push('/');
+      router.push("/");
     } catch {
-      setError('Erreur lors de l\'inscription');
+      setError("Erreur lors de l'inscription");
     } finally {
       setLoading(false);
     }
@@ -93,7 +104,10 @@ export default function RegisterPage(): ReactNode {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="name" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="name"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Nom complet
             </label>
             <Input
@@ -108,7 +122,10 @@ export default function RegisterPage(): ReactNode {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Email étudiant
             </label>
             <Input
@@ -126,7 +143,10 @@ export default function RegisterPage(): ReactNode {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="student_id" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="student_id"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Numéro d'étudiant
             </label>
             <Input
@@ -141,7 +161,10 @@ export default function RegisterPage(): ReactNode {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Mot de passe
             </label>
             <Input
@@ -159,7 +182,10 @@ export default function RegisterPage(): ReactNode {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password_confirmation" className="block text-sm font-semibold text-[var(--color-foreground)]">
+            <label
+              htmlFor="password_confirmation"
+              className="block text-sm font-semibold text-[var(--color-foreground)]"
+            >
               Confirmer le mot de passe
             </label>
             <Input
@@ -174,15 +200,18 @@ export default function RegisterPage(): ReactNode {
           </div>
 
           <Button className="w-full" disabled={loading}>
-            {loading ? 'Inscription...' : 'Créer un compte'}
+            {loading ? "Inscription..." : "Créer un compte"}
           </Button>
         </form>
 
         {/* Lien connexion */}
         <div className="text-center">
           <p className="text-sm text-[var(--color-muted)]">
-            Déjà inscrit ?{' '}
-            <Link href="/login" className="font-semibold text-[var(--color-primary-dark)] hover:text-[var(--color-primary)]">
+            Déjà inscrit ?{" "}
+            <Link
+              href="/login"
+              className="font-semibold text-[var(--color-primary-dark)] hover:text-[var(--color-primary)]"
+            >
               Se connecter
             </Link>
           </p>
@@ -191,11 +220,11 @@ export default function RegisterPage(): ReactNode {
         {/* Conditions */}
         <div className="rounded-[20px] border border-[var(--color-border)] bg-[var(--color-surface)] p-4">
           <p className="text-xs text-[var(--color-muted)]">
-            En t'inscrivant, tu acceptes nos conditions d'utilisation et notre politique de confidentialité.
+            En t'inscrivant, tu acceptes nos conditions d'utilisation et notre
+            politique de confidentialité.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

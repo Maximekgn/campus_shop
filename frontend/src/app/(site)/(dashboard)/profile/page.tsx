@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import { ChangeEvent, FormEvent, useState, ReactNode } from 'react';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import { mockUsers } from '@/data/users';
-import type { User } from '@/types';
+import { ChangeEvent, FormEvent, useState, ReactNode } from "react";
+import { Check, Shield, User } from "lucide-react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { mockUsers } from "@/data/users";
+import type { User } from "@/types";
 
 export default function ProfilePage(): ReactNode {
   // Simulation de l'utilisateur connecté (u1)
   const currentUser = mockUsers[0] as User;
-  
+
   const [formData, setFormData] = useState({
     name: currentUser.name,
     email: currentUser.email,
-    student_id: currentUser.student_id || '',
+    student_id: currentUser.student_id || "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -41,8 +42,12 @@ export default function ProfilePage(): ReactNode {
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">Mon profil</h1>
-        <p className="mt-1 text-[var(--color-muted)]">Gère tes informations personnelles</p>
+        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">
+          Mon profil
+        </h1>
+        <p className="mt-1 text-[var(--color-muted)]">
+          Gère tes informations personnelles
+        </p>
       </div>
 
       <div className="grid gap-10 md:grid-cols-3">
@@ -57,12 +62,18 @@ export default function ProfilePage(): ReactNode {
             <form onSubmit={handleSubmit} className="space-y-6">
               {success && (
                 <div className="rounded-[16px] border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                  ✓ Profil mis à jour avec succès
+                  <>
+                    <Check className="mr-1 h-4 w-4" /> Profil mis à jour avec
+                    succès
+                  </>
                 </div>
               )}
 
               <div className="space-y-2">
-                <label htmlFor="name" className="block text-sm font-semibold text-[var(--color-foreground)]">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-semibold text-[var(--color-foreground)]"
+                >
                   Nom complet
                 </label>
                 <Input
@@ -75,7 +86,10 @@ export default function ProfilePage(): ReactNode {
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-semibold text-[var(--color-foreground)]">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-semibold text-[var(--color-foreground)]"
+                >
                   Email
                 </label>
                 <Input
@@ -86,11 +100,16 @@ export default function ProfilePage(): ReactNode {
                   onChange={handleChange}
                   disabled
                 />
-                <p className="text-xs text-[var(--color-muted)]">Non modifiable</p>
+                <p className="text-xs text-[var(--color-muted)]">
+                  Non modifiable
+                </p>
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="student_id" className="block text-sm font-semibold text-[var(--color-foreground)]">
+                <label
+                  htmlFor="student_id"
+                  className="block text-sm font-semibold text-[var(--color-foreground)]"
+                >
                   Numéro d'étudiant
                 </label>
                 <Input
@@ -101,11 +120,15 @@ export default function ProfilePage(): ReactNode {
                   onChange={handleChange}
                   disabled
                 />
-                <p className="text-xs text-[var(--color-muted)]">Non modifiable</p>
+                <p className="text-xs text-[var(--color-muted)]">
+                  Non modifiable
+                </p>
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}
+                {loading
+                  ? "Enregistrement..."
+                  : "Enregistrer les modifications"}
               </Button>
             </form>
           </div>
@@ -122,8 +145,13 @@ export default function ProfilePage(): ReactNode {
 
           {/* Zone de danger */}
           <div className="rounded-[28px] border border-red-200 bg-red-50 p-8">
-            <h2 className="mb-6 text-2xl font-semibold text-red-700">Zone de danger</h2>
-            <Button variant="ghost" className="w-full text-red-700 hover:bg-red-100">
+            <h2 className="mb-6 text-2xl font-semibold text-red-700">
+              Zone de danger
+            </h2>
+            <Button
+              variant="ghost"
+              className="w-full text-red-700 hover:bg-red-100"
+            >
               Supprimer mon compte
             </Button>
           </div>
@@ -137,10 +165,10 @@ export default function ProfilePage(): ReactNode {
               Membre depuis
             </h3>
             <p className="text-lg font-semibold text-[var(--color-foreground)]">
-              {new Date(currentUser.created_at).toLocaleDateString('fr-FR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+              {new Date(currentUser.created_at).toLocaleDateString("fr-FR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </p>
           </div>
@@ -153,11 +181,17 @@ export default function ProfilePage(): ReactNode {
             <div
               className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
                 currentUser.is_active
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-red-100 text-red-700'
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
               }`}
             >
-              {currentUser.is_active ? '✓ Actif' : 'Banni'}
+              {currentUser.is_active ? (
+                <>
+                  <Check className="mr-1 h-4 w-4" /> Actif
+                </>
+              ) : (
+                "Banni"
+              )}
             </div>
           </div>
 
@@ -167,7 +201,15 @@ export default function ProfilePage(): ReactNode {
               Rôle
             </h3>
             <p className="text-sm font-semibold capitalize text-[var(--color-foreground)]">
-              {currentUser.role === 'moderator' ? '🔐 Modérateur' : '👤 Membre'}
+              {currentUser.role === "moderator" ? (
+                <>
+                  <Shield className="mr-1 h-4 w-4" /> Modérateur
+                </>
+              ) : (
+                <>
+                  <User className="mr-1 h-4 w-4" /> Membre
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -175,4 +217,3 @@ export default function ProfilePage(): ReactNode {
     </div>
   );
 }
-

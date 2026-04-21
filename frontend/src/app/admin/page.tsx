@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { ReactNode, useEffect, useState } from 'react';
-import Link from 'next/link';
-import Button from '@/components/ui/Button';
-import type { Listing } from '@/types';
-import { mockListings } from '@/data/listings';
-import { moderationService } from '@/services/moderation.service';
+import { ReactNode, useEffect, useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import type { Listing } from "@/types";
+import { mockListings } from "@/data/listings";
+import { moderationService } from "@/services/moderation.service";
 
 export default function AdminDashboard(): ReactNode {
   const [pendingListings, setPendingListings] = useState<Listing[]>([]);
@@ -32,9 +32,13 @@ export default function AdminDashboard(): ReactNode {
         setUsersCount(overview.usersCount);
         setPendingListings(pending);
       } catch (err) {
-        console.error('Failed to load admin data:', err);
+        console.error("Failed to load admin data:", err);
         setError(true);
-        setPendingListings(mockListings.filter((l) => l.status !== 'archivee').slice(0, 3) as Listing[]);
+        setPendingListings(
+          mockListings
+            .filter((l) => l.status !== "archivee")
+            .slice(0, 3) as Listing[],
+        );
         setReportCount(2);
         setUsersCount(5);
       } finally {
@@ -55,8 +59,12 @@ export default function AdminDashboard(): ReactNode {
     <div className="w-full">
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">Tableau de bord modération</h1>
-        <p className="mt-1 text-[var(--color-muted)]">Gère les annonces et les signalements</p>
+        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">
+          Tableau de bord modération
+        </h1>
+        <p className="mt-1 text-[var(--color-muted)]">
+          Gère les annonces et les signalements
+        </p>
       </div>
 
       {loading && (
@@ -95,13 +103,17 @@ export default function AdminDashboard(): ReactNode {
 
       {/* Actions rapides */}
       <div className="mb-10 space-y-4">
-        <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">Actions rapides</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-foreground)]">
+          Actions rapides
+        </h2>
         <div className="flex flex-wrap gap-3">
           <Link href="/admin/pending">
             <Button>Valider les annonces ({pendingListings.length})</Button>
           </Link>
           <Link href="/admin/reports">
-            <Button variant="secondary">Traiter les signalements ({reportCount})</Button>
+            <Button variant="secondary">
+              Traiter les signalements ({reportCount})
+            </Button>
           </Link>
           <Link href="/admin/users">
             <Button variant="ghost">Gérer les membres</Button>
@@ -122,7 +134,9 @@ export default function AdminDashboard(): ReactNode {
               <Link key={listing.id} href={`/admin/pending/${listing.id}`}>
                 <div className="flex items-center justify-between rounded-[20px] border border-[var(--color-border)] p-4 transition hover:border-[var(--color-primary)]">
                   <div>
-                    <h3 className="font-semibold text-[var(--color-foreground)]">{listing.title}</h3>
+                    <h3 className="font-semibold text-[var(--color-foreground)]">
+                      {listing.title}
+                    </h3>
                     <p className="mt-1 text-sm text-[var(--color-muted)]">
                       par {listing.user_id} • {listing.type}
                     </p>
@@ -139,4 +153,3 @@ export default function AdminDashboard(): ReactNode {
     </div>
   );
 }
-

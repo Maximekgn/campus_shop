@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { Check, X, AlertTriangle, Info } from 'lucide-react';
 import { useToast } from '@/contexts/ToastContext';
 
 export default function ToastContainer(): ReactNode {
@@ -9,13 +10,13 @@ export default function ToastContainer(): ReactNode {
   const getIcon = (type: string) => {
     switch (type) {
       case 'success':
-        return '✓';
+        return <Check className="h-4 w-4" />;
       case 'error':
-        return '✕';
+        return <X className="h-4 w-4" />;
       case 'warning':
-        return '⚠';
+        return <AlertTriangle className="h-4 w-4" />;
       case 'info':
-        return 'ℹ';
+        return <Info className="h-4 w-4" />;
       default:
         return '•';
     }
@@ -49,7 +50,7 @@ export default function ToastContainer(): ReactNode {
             onClick={() => removeToast(toast.id)}
             className="ml-2 opacity-70 transition hover:opacity-100"
           >
-            ✕
+            <X className="h-4 w-4" />
           </button>
         </div>
       ))}

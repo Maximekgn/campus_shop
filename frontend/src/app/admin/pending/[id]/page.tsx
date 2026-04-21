@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
+import { Check, X } from 'lucide-react';
 import { useParams } from 'next/navigation';
 import type { Listing, User } from '@/types';
 import { moderationService } from '@/services/moderation.service';
@@ -195,14 +196,14 @@ export default function PendingListingDetailPage(): ReactNode {
               disabled={busyAction !== null}
               className="w-full rounded-full bg-green-100 py-3 font-semibold text-green-700 transition hover:bg-green-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {busyAction === 'approve' ? 'Validation...' : "✓ Valider l'annonce"}
+              {busyAction === 'approve' ? 'Validation...' : <><Check className="mr-1 h-4 w-4" /> Valider l'annonce</>}
             </button>
             <button
               onClick={handleReject}
               disabled={busyAction !== null}
               className="w-full rounded-full border border-red-300 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {busyAction === 'reject' ? 'Rejet...' : "✕ Rejeter l'annonce"}
+              {busyAction === 'reject' ? 'Rejet...' : <><X className="mr-1 h-4 w-4" /> Rejeter l'annonce</>}
             </button>
             <Link href="/messages">
               <button className="w-full rounded-full border border-[var(--color-border)] py-3 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)]">

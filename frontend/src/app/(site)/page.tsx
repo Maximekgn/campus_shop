@@ -5,7 +5,7 @@ import Link from 'next/link';
 import ListingCard from '@/components/listings/ListingCard';
 import { mockListings } from '@/data/listings';
 import { listingService } from '@/services/listing.service';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import {LoadingSpinner} from '@/components/ui/LoadingSpinner';
 import type { Listing } from '@/types';
 
 type CategoryItem = {

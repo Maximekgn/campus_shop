@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function TermsPage(): ReactNode {
@@ -9,7 +10,7 @@ export default function TermsPage(): ReactNode {
       {/* Header */}
       <div className="mb-10">
         <Link href="/">
-          <button className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] mb-4">← Retour</button>
+          <button className="flex items-center text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] mb-4"><ArrowLeft className="mr-1 h-4 w-4" /> Retour</button>
         </Link>
         <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">Conditions d'utilisation</h1>
         <p className="text-sm text-[var(--color-muted)] mt-2">Dernière mise à jour : avril 2026</p>

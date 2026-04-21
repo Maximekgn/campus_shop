@@ -1,30 +1,18 @@
-'use client';
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-import { ReactNode } from 'react';
-
-export default function Skeleton({
-  className = '',
-  variant = 'text',
-}: {
-  className?: string;
-  variant?: 'text' | 'card' | 'circle';
-}): ReactNode {
-  const baseClasses =
-    'animate-pulse bg-gradient-to-r from-[var(--color-soft)] via-[var(--color-primary-soft)] to-[var(--color-soft)] bg-[length:200%_100%] rounded';
-
-  const variantClasses = {
-    text: 'h-4 w-3/4 rounded-[8px]',
-    card: 'h-48 w-full rounded-[28px]',
-    circle: 'h-12 w-12 rounded-full',
-  };
-
+const Skeleton = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
   return (
     <div
-      className={`${baseClasses} ${variantClasses[variant]} ${className}`}
-      style={{
-        backgroundPosition: '200% 0',
-        animation: 'shimmer 2s infinite',
-      }}
+      ref={ref}
+      className={cn("animate-pulse rounded-md bg-slate-100", className)}
+      {...props}
     />
-  );
-}
+  )
+})
+Skeleton.displayName = "Skeleton"
+
+export { Skeleton }

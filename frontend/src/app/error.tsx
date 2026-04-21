@@ -1,8 +1,9 @@
 'use client';
 
 import { ReactNode, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import {Button} from '@/components/ui/Button';
 
 export default function ErrorPage({
   error,
@@ -19,7 +20,7 @@ export default function ErrorPage({
     <div className="mx-auto flex w-full max-w-3xl flex-col items-center justify-center px-4 py-20 sm:px-6 lg:px-8">
       {/* Error Icon */}
       <div className="mb-6 rounded-full bg-red-100 p-6">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle className="h-12 w-12 text-red-500" />
       </div>
 
       {/* Content */}

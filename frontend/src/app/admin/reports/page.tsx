@@ -1,6 +1,7 @@
 'use client';
 
 import { ReactNode, useEffect, useMemo, useState } from 'react';
+import { Check } from 'lucide-react';
 import Link from 'next/link';
 import { mockListings } from '@/data/listings';
 import { AdminReport, moderationService } from '@/services/moderation.service';
@@ -152,7 +153,7 @@ export default function ReportsPage(): ReactNode {
                     disabled={busyId === report.id || report.status !== 'open'}
                     className="rounded-full border border-green-500 px-6 py-2 font-semibold text-green-600 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {busyId === report.id ? 'Traitement...' : '✓ Marquer résolu'}
+                    {busyId === report.id ? 'Traitement...' : <><Check className="mr-1 h-4 w-4" /> Marquer résolu</>}
                   </button>
                   <button
                     onClick={() => handleDismiss(report.id)}

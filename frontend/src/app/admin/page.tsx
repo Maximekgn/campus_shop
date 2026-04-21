@@ -30,7 +30,7 @@ export default function AdminDashboard(): ReactNode {
 
         setReportCount(overview.openReportsCount);
         setUsersCount(overview.usersCount);
-        setPendingListings(pending);
+        setPendingListings(pending.data || []);
       } catch (err) {
         console.error("Failed to load admin data:", err);
         setError(true);

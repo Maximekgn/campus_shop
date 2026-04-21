@@ -25,6 +25,7 @@ export const authService = {
     }
     const data = await res.json();
     localStorage.setItem('auth_token', data.token);
+    document.cookie = `auth_role=${data.user.role};path=/;max-age=${60 * 60 * 24 * 7}`;
     return data;
   },
 
@@ -43,6 +44,7 @@ export const authService = {
     }
     const response = await res.json();
     localStorage.setItem('auth_token', response.token);
+    document.cookie = `auth_role=${response.user.role};path=/;max-age=${60 * 60 * 24 * 7}`;
     return response;
   },
 
@@ -59,6 +61,7 @@ export const authService = {
         });
       } finally {
         localStorage.removeItem('auth_token');
+        document.cookie = 'auth_role=;path=/;max-age=0';
       }
     }
   },

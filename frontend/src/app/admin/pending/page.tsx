@@ -112,7 +112,7 @@ export default function PendingListingsPage(): ReactNode {
                   <p className="mt-1 text-sm text-[var(--color-muted)]">
                     Prix:{" "}
                     <span className="font-medium text-[var(--color-primary)]">
-                      {listing.price} FCFA
+                      {listing.price ?? 0} FCFA
                     </span>
                   </p>
                 </div>

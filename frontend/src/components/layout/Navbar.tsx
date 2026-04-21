@@ -28,7 +28,7 @@ export default function Navbar() {
 
         {/* Nav */}
         <nav className="hidden items-center gap-6 md:flex">
-          {user?.role !== "moderator" &&
+          {user?.role !== "moderateur" &&
             navLinks.map(({ href, label }) => (
               <Link
                 key={href}

@@ -3,7 +3,7 @@ import { Listing, User } from '../types';
 import { mockListings } from '../data/listings';
 import { mockUsers } from '../data/users';
 
-export type AdminReportStatus = 'open' | 'resolved' | 'dismissed';
+export type AdminReportStatus = 'pending' | 'resolved' | 'dismissed';
 
 export interface AdminReport {
   id: number;
@@ -32,12 +32,13 @@ async function postApi(path: string, data?: unknown): Promise<boolean> {
 }
 
 export const moderationService = {
-  getPendingListings: async (): Promise<Listing[]> => {
-    const data = await fetchApi<Listing[]>('/moderation/pending');
+  getPendingListings: async (): Promise<{ data: Listing[] }> => {
+    const data = await fetchApi<{ data: Listing[] }>('/moderation/pending');
     if (data) return data;
     
-    const mock = mockListings.filter((l) => l.status !== 'archivee').slice(0, 5) as Listing[];
-    return mock;
+    return {
+      data: mockListings.filter((l) => l.status !== 'archivee').slice(0, 5) as Listing[]
+    };
   },
 
   getPendingListingById: async (id: number): Promise<Listing | null> => {
@@ -56,25 +57,41 @@ export const moderationService = {
   },
 
   getReports: async (): Promise<AdminReport[]> => {
-    const data = await fetchApi<AdminReport[]>('/moderation/reports');
-    if (data) return data;
+    const data = await fetchApi<{ data: AdminReport[] }>('/moderation/reports');
+    if (data) return data.data;
     
     return [
-      { id: 1, listing_id: 2, reason: 'Contenu inapproprié', reporter_id: 2, status: 'open', created_at: '2026-04-18T10:30:00' },
-      { id: 2, listing_id: 3, reason: 'Prix suspect', reporter_id: 1, status: 'open', created_at: '2026-04-17T14:15:00' },
+      { id: 1, listing_id: 2, reason: 'Contenu inapproprié', reporter_id: 2, status: 'pending', created_at: '2026-04-18T10:30:00' },
+      { id: 2, listing_id: 3, reason: 'Prix suspect', reporter_id: 1, status: 'pending', created_at: '2026-04-17T14:15:00' },
     ];
   },
 
-  resolveReport: async (id: number, action: 'dismiss' | 'ban'): Promise<boolean> => {
+  resolveReport: async (id: number, action: 'hide' | 'warn' | 'delete'): Promise<boolean> => {
     const success = await postApi(`/moderation/reports/${id}`, { action });
     return success;
   },
 
   getUsers: async (): Promise<User[]> => {
-    const data = await fetchApi<User[]>('/moderation/users');
-    if (data) return data;
+    const data = await fetchApi<{ data: User[] }>('/moderation/users');
+    if (data) return data.data;
     
     return mockUsers as User[];
+  },
+
+  getUserListingsCount: async (): Promise<Record<string, number>> => {
+    const data = await fetchApi<Record<string, number>>('/moderation/users/counts');
+    return data || {};
+  },
+
+  toggleUserStatus: async (id: string): Promise<boolean> => {
+    const user = await moderationService.getUsers().then(users => users.find(u => u.id.toString() === id));
+    if (!user) return false;
+    
+    if (user.is_active) {
+      return postApi(`/moderation/users/${id}/ban`, { ban_until: '2026-05-01' });
+    } else {
+      return postApi(`/moderation/users/${id}/unban`);
+    }
   },
 
   banUser: async (id: number): Promise<boolean> => {
@@ -109,8 +126,8 @@ export const moderationService = {
     ]);
 
     return {
-      pendingCount: pending.length,
-      openReportsCount: reports.filter((r) => r.status === 'open').length,
+      pendingCount: pending.data?.length || pending.length,
+      openReportsCount: reports.filter((r) => r.status === 'pending').length,
       usersCount: users.length,
     };
   },

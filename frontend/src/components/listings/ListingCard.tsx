@@ -41,78 +41,81 @@ export default function ListingCard({ listing }: ListingCardProps) {
   const photo = listing.photos?.[0]?.path ?? `https://picsum.photos/seed/${listing.id}/400/300`;
 
   return (
-    <Link href={`/listings/${listing.id}`}>
+    <Link href={`/listings/${listing.id}`} className="group block h-full">
       <article
-        className={`group overflow-hidden rounded-2xl border border-[var(--color-border)] bg-white transition hover:border-[var(--color-foreground)]/20 hover:shadow-md ${
+        className={`relative flex h-full flex-col overflow-hidden rounded-2xl bg-white border border-[var(--color-border)]/50 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:-translate-y-1 hover:border-[var(--color-border)] ${
           isReserved ? 'opacity-60' : ''
         }`}
       >
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden bg-[var(--color-surface)]">
+        {/* Image Section */}
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-surface)]">
           {photo ? (
             <img
               src={photo}
               alt={listing.title}
-              className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              className="h-full w-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
             />
           ) : (
             <div className="flex h-full items-center justify-center">
               <Package className="h-10 w-10 text-[var(--color-border)]" />
             </div>
           )}
+          
+          {/* Subtle gradient overlay for better badge readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-          {/* Type badge */}
-          <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-black/60 px-2.5 py-1 text-[11px] font-medium uppercase tracking-wider text-white backdrop-blur-sm">
-            {typeLabel[listing.type ?? ''] ?? listing.type}
-          </span>
-
-          {/* New badge */}
-          {isNewListing && (
-            <span className="absolute right-3 top-3 rounded-full bg-emerald-500 px-2.5 py-1 text-[11px] font-semibold text-white">
-              Nouveau
+          {/* Badges */}
+          <div className="absolute left-3 top-3 flex flex-col gap-2">
+            <span className="inline-flex w-fit items-center rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-[var(--color-foreground)] backdrop-blur-sm shadow-sm">
+              {typeLabel[listing.type ?? ''] ?? listing.type}
             </span>
-          )}
+            {isNewListing && (
+              <span className="inline-flex w-fit items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white backdrop-blur-sm shadow-sm">
+                Nouveau
+              </span>
+            )}
+          </div>
 
-          {/* Reserved overlay */}
+          {/* Favorite Button */}
+          <button
+            onClick={handleFavorite}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-[var(--color-muted)] backdrop-blur-sm transition-all hover:bg-white hover:scale-110 hover:text-red-500 shadow-sm"
+            aria-label="Ajouter aux favoris"
+          >
+            <Heart
+              className={`h-4 w-4 transition-colors ${isFavorited ? 'fill-red-500 text-red-500' : ''}`}
+            />
+          </button>
+
+          {/* Reserved Overlay */}
           {isReserved && (
-            <div className="absolute inset-0 flex items-center justify-center bg-white/50 backdrop-blur-[2px]">
-              <span className="rounded-full border border-[var(--color-border)] bg-white px-4 py-1.5 text-xs font-semibold text-[var(--color-muted)] shadow-sm">
+            <div className="absolute inset-0 flex items-center justify-center bg-white/60 backdrop-blur-[2px]">
+              <span className="rounded-full border border-[var(--color-border)] bg-white px-5 py-2 text-xs font-bold uppercase tracking-widest text-[var(--color-muted)] shadow-sm">
                 {listing.status === 'vendue' ? 'Vendu' : 'Réservé'}
               </span>
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate text-sm font-semibold text-[var(--color-foreground)]">
-                {listing.title}
-              </h3>
-              <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-[var(--color-muted)]">
-                {listing.description}
-              </p>
-            </div>
-            <button
-              onClick={handleFavorite}
-              className="shrink-0 rounded-full p-1.5 text-[var(--color-muted)] transition hover:text-red-500"
-              aria-label="Ajouter aux favoris"
-            >
-              <Heart
-                className={`h-4 w-4 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`}
-              />
-            </button>
+        {/* Content Section */}
+        <div className="flex flex-1 flex-col p-4 sm:p-5">
+          <div className="flex-1">
+            <h3 className="line-clamp-1 text-base font-bold tracking-tight text-[var(--color-foreground)] group-hover:text-[var(--color-primary-dark)] transition-colors">
+              {listing.title}
+            </h3>
+            <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-[var(--color-muted)]">
+              {listing.description}
+            </p>
           </div>
 
-          {/* Price row */}
-          <div className="mt-3 flex items-center justify-between border-t border-[var(--color-border)] pt-3">
-            <span className="text-sm font-semibold text-[var(--color-foreground)]">
+          {/* Price & Meta Footer */}
+          <div className="mt-4 flex items-end justify-between pt-4">
+            <span className="text-lg font-black tracking-tight text-[var(--color-foreground)]">
               {listing.price != null && listing.price > 0
                 ? `${listing.price.toLocaleString()} FCFA`
                 : 'Gratuit'}
             </span>
-            <span className="text-xs text-[var(--color-muted)]">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[var(--color-muted)]">
               {listing.views_count ?? 0} vue{(listing.views_count ?? 0) !== 1 ? 's' : ''}
             </span>
           </div>

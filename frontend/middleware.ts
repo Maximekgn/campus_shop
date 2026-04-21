@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
 
   // Si l'utilisateur est sur une route d'auth et est déjà connecté
   if (authRoutes.includes(pathname) && isAuthenticated) {
-    const destination = role === 'moderator' ? '/admin' : '/my-listings';
+    const destination = role === 'moderateur' ? '/admin' : '/my-listings';
     return NextResponse.redirect(new URL(destination, request.url));
   }
 
@@ -36,7 +36,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Contrôle d'accès admin
-  if (pathname.startsWith('/admin') && role !== 'moderator') {
+  if (pathname.startsWith('/admin') && role !== 'moderateur') {
     return NextResponse.redirect(new URL('/my-listings', request.url));
   }
 

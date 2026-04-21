@@ -145,7 +145,7 @@ export default function ProfilePage(): ReactNode {
               Rôle
             </p>
             <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-foreground)]">
-              {currentUser.role === "moderator"
+              {currentUser.role === "moderateur"
                 ? <><Shield className="h-4 w-4" /> Modérateur</>
                 : <><User className="h-4 w-4" /> Membre</>}
             </p>

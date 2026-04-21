@@ -8,7 +8,7 @@ import { AdminReport, moderationService } from '@/services/moderation.service';
 
 export default function ReportsPage(): ReactNode {
   const [reports, setReports] = useState<AdminReport[]>([]);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'open' | 'resolved'>('all');
+  const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'resolved'>('all');
   const [busyId, setBusyId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -44,7 +44,7 @@ export default function ReportsPage(): ReactNode {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'open':
+      case 'pending':
         return <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">Ouvert</span>;
       case 'resolved':
         return <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-semibold text-green-700">Résolu</span>;
@@ -58,7 +58,7 @@ export default function ReportsPage(): ReactNode {
   const handleResolve = async (reportId: string) => {
     setBusyId(reportId);
     try {
-      await moderationService.resolveReport(reportId, 'mask');
+      await moderationService.resolveReport(reportId, 'hide');
       setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: 'resolved' as const } : r)));
     } finally {
       setBusyId(null);
@@ -68,7 +68,7 @@ export default function ReportsPage(): ReactNode {
   const handleDismiss = async (reportId: string) => {
     setBusyId(reportId);
     try {
-      await moderationService.resolveReport(reportId, 'dismiss');
+      await moderationService.resolveReport(reportId, 'warn');
       setReports((prev) => prev.map((r) => (r.id === reportId ? { ...r, status: 'dismissed' as const } : r)));
     } finally {
       setBusyId(null);
@@ -80,7 +80,7 @@ export default function ReportsPage(): ReactNode {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-semibold text-[var(--color-foreground)]">Signalements</h1>
-        <p className="mt-1 text-[var(--color-muted)]">{reports.filter((r) => r.status === 'open').length} ouvert(s)</p>
+        <p className="mt-1 text-[var(--color-muted)]">{reports.filter((r) => r.status === 'pending').length} ouvert(s)</p>
       </div>
 
       {/* Filters */}
@@ -96,9 +96,9 @@ export default function ReportsPage(): ReactNode {
           Tous
         </button>
         <button
-          onClick={() => setActiveFilter('open')}
+          onClick={() => setActiveFilter('pending')}
           className={`rounded-full px-4 py-2 font-semibold transition ${
-            activeFilter === 'open'
+            activeFilter === 'pending'
               ? 'border-2 border-[var(--color-primary)] bg-[var(--color-primary-soft)] text-[var(--color-primary)]'
               : 'border border-[var(--color-border)] text-[var(--color-foreground)] hover:bg-[var(--color-soft)]'
           }`}
@@ -150,14 +150,14 @@ export default function ReportsPage(): ReactNode {
                 <div className="flex gap-3">
                   <button
                     onClick={() => handleResolve(report.id)}
-                    disabled={busyId === report.id || report.status !== 'open'}
+                    disabled={busyId === report.id || report.status !== 'pending'}
                     className="rounded-full border border-green-500 px-6 py-2 font-semibold text-green-600 transition hover:bg-green-50 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {busyId === report.id ? 'Traitement...' : <><Check className="mr-1 h-4 w-4" /> Marquer résolu</>}
                   </button>
                   <button
                     onClick={() => handleDismiss(report.id)}
-                    disabled={busyId === report.id || report.status !== 'open'}
+                    disabled={busyId === report.id || report.status !== 'pending'}
                     className="rounded-full border border-[var(--color-border)] px-6 py-2 font-semibold text-[var(--color-foreground)] transition hover:bg-[var(--color-soft)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     Ignorer

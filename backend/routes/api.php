@@ -107,10 +107,13 @@ Route::middleware(['auth:sanctum', 'active'])->group(function () {
 // 5.5 Moderation — /api/moderation
 // ──────────────────────────────────────────────
 Route::prefix('moderation')
-    ->middleware(['auth:sanctum', 'active', 'role:moderator'])
+    ->middleware(['auth:sanctum', 'active', 'role:moderateur'])
     ->group(function () {
         // Listing moderation
         Route::get('/pending', [ModerationListingController::class, 'pending']);
+        Route::get('/listings/{listing}/note', [ModerationListingController::class, 'getNote']);
+        Route::put('/listings/{listing}/note', [ModerationListingController::class, 'saveNote']);
+        Route::get('/listings/{listing}/seller', [ModerationListingController::class, 'getSeller']);
         Route::put('/listings/{listing}/approve', [ModerationListingController::class, 'approve']);
         Route::put('/listings/{listing}/reject', [ModerationListingController::class, 'reject']);
 

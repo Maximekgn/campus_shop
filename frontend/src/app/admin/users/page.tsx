@@ -43,7 +43,7 @@ export default function UsersPage(): ReactNode {
   const stats = useMemo(() => {
     const activeUsers = users.filter((user) => user.is_active).length;
     const bannedUsers = users.filter((user) => !user.is_active).length;
-    const moderators = users.filter((user) => user.role === 'moderator').length;
+    const moderators = users.filter((user) => user.role === 'moderateur').length;
 
     return { activeUsers, bannedUsers, moderators };
   }, [users]);

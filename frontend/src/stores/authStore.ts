@@ -67,6 +67,9 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const userData = await authService.getCurrentUser();
+          if (userData) {
+            document.cookie = `auth_role=${userData.role};path=/;max-age=${60 * 60 * 24 * 7}`;
+          }
           set({ 
             user: userData, 
             isAuthenticated: !!userData, 

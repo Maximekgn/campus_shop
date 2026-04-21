@@ -35,7 +35,7 @@ export default function ConversationDetailPage({
         console.error("Failed to fetch conversation:", err);
         setError(true);
         const mockConv = {
-          id,
+          id: Number(id),
           listing_id: 1,
           buyer_id: 1,
           seller_id: 2,

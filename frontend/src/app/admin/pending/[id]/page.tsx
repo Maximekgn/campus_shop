@@ -24,8 +24,8 @@ export default function PendingListingDetailPage(): ReactNode {
       setLoading(true);
       try {
         const [detail, existingNote] = await Promise.all([
-          moderationService.getPendingListingById(id),
-          moderationService.getListingModeratorNote(id),
+          moderationService.getPendingListingById(Number(id)),
+          moderationService.getListingModeratorNote(Number(id)),
         ]);
 
         if (!mounted) {

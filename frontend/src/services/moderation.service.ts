@@ -87,6 +87,20 @@ export const moderationService = {
     return success;
   },
 
+  getListingModeratorNote: async (listingId: number): Promise<string> => {
+    const data = await fetchApi<{ note: string }>(`/moderation/listings/${listingId}/note`);
+    return data?.note || '';
+  },
+
+  saveListingModeratorNote: async (listingId: number, note: string): Promise<boolean> => {
+    return postApi(`/moderation/listings/${listingId}/note`, { note });
+  },
+
+  getSellerForListing: async (listingId: number): Promise<User | null> => {
+    const data = await fetchApi<{ seller: User }>(`/moderation/listings/${listingId}/seller`);
+    return data?.seller || null;
+  },
+
   getOverview: async (): Promise<{ pendingCount: number; openReportsCount: number; usersCount: number }> => {
     const [pending, reports, users] = await Promise.all([
       moderationService.getPendingListings(),

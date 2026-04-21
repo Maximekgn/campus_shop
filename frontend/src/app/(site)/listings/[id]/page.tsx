@@ -93,7 +93,9 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
   };
 
   const handleReport = () => {
-    router.push(`/report/${listing.id}`);
+    if (listing) {
+      router.push(`/report/${listing.id}`);
+    }
   };
 
   const handleSellerClick = () => {
@@ -130,7 +132,7 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
   const isReservedOrSold =
     listing.status === "reservee" || listing.status === "vendue";
   const seller =
-    listing.user || mockUsers.find((u) => u.id === String(listing.user_id));
+    listing.user || mockUsers.find((u) => u.id === listing.user_id);
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">

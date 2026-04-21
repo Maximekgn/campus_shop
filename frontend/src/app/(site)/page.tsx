@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import ListingCard from '@/components/listings/ListingCard';
 import { mockListings } from '@/data/listings';
 import { listingService } from '@/services/listing.service';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import type { Listing } from '@/types';
-import { ArrowRight, Tag, Gift, RefreshCw, Search } from 'lucide-react';
+import { ArrowRight, Tag, Gift, RefreshCw, Search, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 
 type CategoryItem = {
   key: string;
@@ -27,6 +27,145 @@ const categoryIcons: Record<string, React.ReactNode> = {
   don: <Gift className="h-5 w-5" />,
   échange: <RefreshCw className="h-5 w-5" />,
 };
+
+const typeLabel: Record<string, string> = {
+  vente: 'À vendre',
+  don: 'À donner',
+  échange: 'Échange',
+};
+
+const typeBadgeColor: Record<string, string> = {
+  vente: 'bg-blue-500/80',
+  don: 'bg-emerald-500/80',
+  échange: 'bg-violet-500/80',
+};
+
+/* ── Popular Articles Carousel ── */
+function PopularCarousel({ articles }: { articles: Listing[] }) {
+  const [index, setIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const popular = useMemo(
+    () => [...articles].sort((a, b) => (b.views_count ?? 0) - (a.views_count ?? 0)).slice(0, 5),
+    [articles]
+  );
+
+  const goTo = (next: number) => {
+    if (animating) return;
+    setAnimating(true);
+    setTimeout(() => {
+      setIndex((next + popular.length) % popular.length);
+      setAnimating(false);
+    }, 200);
+  };
+
+  // Auto-play
+  useEffect(() => {
+    intervalRef.current = setInterval(() => {
+      goTo(index + 1);
+    }, 4000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, popular.length]);
+
+  if (popular.length === 0) return null;
+
+  const current = popular[index];
+  const photo = current.photos?.[0]?.path ?? `https://picsum.photos/seed/${current.id}/700/500`;
+  const badge = typeBadgeColor[current.type ?? ''] ?? 'bg-black/60';
+
+  return (
+    <div className="relative w-full max-w-sm lg:max-w-md">
+      {/* Card */}
+      <Link href={`/listings/${current.id}`}>
+        <div
+          className="relative overflow-hidden rounded-3xl border border-[var(--color-border)] bg-white shadow-xl cursor-pointer"
+          style={{ transition: 'opacity 0.2s', opacity: animating ? 0 : 1 }}
+        >
+          {/* Image */}
+          <div className="relative h-56 overflow-hidden">
+            <img
+              src={photo}
+              alt={current.title}
+              className="h-full w-full object-cover"
+            />
+            {/* Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+            {/* Type badge */}
+            <span className={`absolute left-4 top-4 rounded-full ${badge} backdrop-blur-sm px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white`}>
+              {typeLabel[current.type ?? ''] ?? current.type}
+            </span>
+
+            {/* Views */}
+            <span className="absolute right-4 top-4 flex items-center gap-1 rounded-full bg-black/50 backdrop-blur-sm px-2.5 py-1 text-[11px] text-white font-medium">
+              <TrendingUp className="h-3 w-3" />
+              {current.views_count} vues
+            </span>
+
+            {/* Title overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <p className="text-base font-semibold text-white leading-tight line-clamp-1">{current.title}</p>
+              <p className="mt-1 text-xs text-white/70 line-clamp-1">{current.description}</p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between px-4 py-3">
+            <span className="text-sm font-bold text-[var(--color-foreground)]">
+              {current.price != null && current.price > 0
+                ? `${current.price.toLocaleString()} FCFA`
+                : 'Gratuit'}
+            </span>
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-primary-dark)]">
+              Voir l'annonce <ArrowRight className="h-3 w-3" />
+            </span>
+          </div>
+        </div>
+      </Link>
+
+      {/* Controls */}
+      <div className="mt-4 flex items-center justify-between">
+        {/* Dots */}
+        <div className="flex items-center gap-1.5">
+          {popular.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className={`rounded-full transition-all duration-300 ${
+                i === index
+                  ? 'w-6 h-2 bg-[var(--color-foreground)]'
+                  : 'w-2 h-2 bg-[var(--color-border)]'
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Arrows */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => goTo(index - 1)}
+            className="rounded-full border border-[var(--color-border)] p-1.5 text-[var(--color-muted)] transition hover:border-[var(--color-foreground)] hover:text-[var(--color-foreground)]"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => goTo(index + 1)}
+            className="rounded-full border border-[var(--color-border)] p-1.5 text-[var(--color-muted)] transition hover:border-[var(--color-foreground)] hover:text-[var(--color-foreground)]"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Counter */}
+      <p className="mt-2 text-center text-xs text-[var(--color-muted)]">
+        {index + 1} / {popular.length} articles populaires
+      </p>
+    </div>
+  );
+}
 
 export default function HomePage() {
   const [listings, setListings] = useState<Listing[]>([]);
@@ -82,54 +221,70 @@ export default function HomePage() {
       )}
 
       {/* ── Hero ── */}
-      <section className="flex flex-col items-start gap-6 sm:gap-8">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-1.5 text-xs font-medium tracking-widest uppercase text-[var(--color-muted)]">
-          CampusShop
+      <section className="flex flex-col-reverse items-center gap-10 lg:flex-row lg:items-center lg:gap-16">
+
+        {/* Left — text */}
+        <div className="flex flex-1 flex-col items-start gap-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-1.5 text-xs font-medium tracking-widest uppercase text-[var(--color-muted)]">
+            CampusShop
+          </div>
+
+          <div className="space-y-4">
+            <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-foreground)] sm:text-5xl lg:text-6xl">
+              Le marché des<br />
+              <span className="text-[var(--color-primary-dark)]">étudiants</span>
+            </h1>
+            <p className="max-w-xl text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
+              Achète, vends, donne ou échange avec d'autres étudiants de ton campus en quelques clics.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/listings"
+              className="inline-flex items-center gap-2 rounded-full bg-[var(--color-foreground)] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-80"
+            >
+              Voir les annonces
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--color-foreground)] transition hover:border-[var(--color-foreground)]"
+            >
+              Me connecter
+            </Link>
+          </div>
+
+          {/* Stats row */}
+          <div className="flex flex-wrap gap-8 pt-2">
+            <div>
+              <p className="text-2xl font-semibold text-[var(--color-foreground)]">{listings.length}</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Annonces actives</p>
+            </div>
+            <div className="w-px bg-[var(--color-border)]" />
+            <div>
+              <p className="text-2xl font-semibold text-[var(--color-foreground)]">{categories.length}</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Catégories</p>
+            </div>
+            <div className="w-px bg-[var(--color-border)]" />
+            <div>
+              <p className="text-2xl font-semibold text-[var(--color-foreground)]">100%</p>
+              <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Gratuit</p>
+            </div>
+          </div>
         </div>
 
-        <div className="max-w-3xl space-y-4">
-          <h1 className="text-4xl font-semibold tracking-tight text-[var(--color-foreground)] sm:text-5xl lg:text-6xl">
-            Le marché des<br />
-            <span className="text-[var(--color-primary-dark)]">étudiants</span>
-          </h1>
-          <p className="max-w-xl text-base leading-relaxed text-[var(--color-muted)] sm:text-lg">
-            Achète, vends, donne ou échange avec d'autres étudiants de ton campus en quelques clics.
-          </p>
+        {/* Right — popular articles carousel */}
+        <div className="flex w-full flex-col items-center lg:w-auto lg:items-end">
+          <div className="mb-3 flex items-center gap-2 self-start lg:self-auto">
+            <TrendingUp className="h-4 w-4 text-[var(--color-primary-dark)]" />
+            <span className="text-sm font-semibold uppercase tracking-widest text-[var(--color-muted)]">
+              Articles populaires
+            </span>
+          </div>
+          <PopularCarousel articles={listings} />
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href="/listings"
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--color-foreground)] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-80"
-          >
-            Voir les annonces
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-white px-6 py-3 text-sm font-semibold text-[var(--color-foreground)] transition hover:border-[var(--color-foreground)]"
-          >
-            Me connecter
-          </Link>
-        </div>
-
-        {/* Stats row */}
-        <div className="flex flex-wrap gap-8 pt-2">
-          <div>
-            <p className="text-2xl font-semibold text-[var(--color-foreground)]">{listings.length}</p>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Annonces actives</p>
-          </div>
-          <div className="w-px bg-[var(--color-border)]" />
-          <div>
-            <p className="text-2xl font-semibold text-[var(--color-foreground)]">{categories.length}</p>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Catégories</p>
-          </div>
-          <div className="w-px bg-[var(--color-border)]" />
-          <div>
-            <p className="text-2xl font-semibold text-[var(--color-foreground)]">100%</p>
-            <p className="text-xs text-[var(--color-muted)] uppercase tracking-wider mt-0.5">Gratuit</p>
-          </div>
-        </div>
       </section>
 
       {/* ── Categories ── */}

@@ -30,7 +30,7 @@ export default function LoginPage(): ReactNode {
     try {
       const result = await login(formData.email, formData.password);
       if (!result.success) { setError(result.error ?? "Erreur de connexion"); return; }
-      router.push(result.user?.role === "moderator" ? "/admin" : "/my-listings");
+      router.push(result.user?.role === "moderateur" ? "/admin" : "/my-listings");
     } catch {
       setError("Erreur de connexion");
     } finally {

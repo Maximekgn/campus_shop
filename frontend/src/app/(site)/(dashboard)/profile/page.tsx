@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/Input";
 import { mockUsers } from "@/data/users";
 import type { User as UserType } from "@/types";
 
+const labelClass = "mb-1.5 block text-sm font-semibold text-[var(--color-foreground)]";
+
 export default function ProfilePage(): ReactNode {
-  // Simulation de l'utilisateur connecté (u1)
   const currentUser = mockUsers[0] as UserType;
 
   const [formData, setFormData] = useState({
@@ -20,17 +21,15 @@ export default function ProfilePage(): ReactNode {
   const [success, setSuccess] = useState(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setSuccess(false);
-
     try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await new Promise((r) => setTimeout(r, 800));
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } finally {
@@ -39,177 +38,116 @@ export default function ProfilePage(): ReactNode {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
+
       {/* Header */}
       <div className="mb-10">
-        <h1 className="text-4xl font-semibold text-[var(--color-foreground)]">
+        <h1 className="text-3xl font-semibold tracking-tight text-[var(--color-foreground)]">
           Mon profil
         </h1>
-        <p className="mt-1 text-[var(--color-muted)]">
-          Gère tes informations personnelles
+        <p className="mt-1 text-sm text-[var(--color-muted)]">
+          Gère tes informations personnelles et la sécurité de ton compte.
         </p>
       </div>
 
-      <div className="grid gap-10 md:grid-cols-3">
-        {/* Colonne gauche : infos perso */}
-        <div className="md:col-span-2 space-y-8">
-          {/* Informations personnelles */}
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8">
-            <h2 className="mb-6 text-2xl font-semibold text-[var(--color-foreground)]">
+      <div className="grid gap-8 md:grid-cols-[1fr_240px]">
+
+        {/* Left — forms */}
+        <div className="space-y-6">
+
+          {/* Personal info */}
+          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
+            <h2 className="mb-5 text-sm font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Informations personnelles
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4">
               {success && (
-                <div className="rounded-[16px] border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
-                  <>
-                    <Check className="mr-1 h-4 w-4" /> Profil mis à jour avec
-                    succès
-                  </>
+                <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
+                  <Check className="h-4 w-4 shrink-0" /> Profil mis à jour avec succès
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="name"
-                  className="block text-sm font-semibold text-[var(--color-foreground)]"
-                >
-                  Nom complet
-                </label>
-                <Input
-                  id="name"
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
+              <div>
+                <label htmlFor="name" className={labelClass}>Nom complet</label>
+                <Input id="name" type="text" name="name" value={formData.name} onChange={handleChange} />
               </div>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-semibold text-[var(--color-foreground)]"
-                >
-                  Email
-                </label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  disabled
-                />
-                <p className="text-xs text-[var(--color-muted)]">
-                  Non modifiable
-                </p>
+              <div>
+                <label htmlFor="email" className={labelClass}>Email</label>
+                <Input id="email" type="email" name="email" value={formData.email} onChange={handleChange} disabled />
+                <p className="mt-1 text-xs text-[var(--color-muted)]">Non modifiable</p>
               </div>
 
-              <div className="space-y-2">
-                <label
-                  htmlFor="student_id"
-                  className="block text-sm font-semibold text-[var(--color-foreground)]"
-                >
-                  Numéro d'étudiant
-                </label>
-                <Input
-                  id="student_id"
-                  type="text"
-                  name="student_id"
-                  value={formData.student_id}
-                  onChange={handleChange}
-                  disabled
-                />
-                <p className="text-xs text-[var(--color-muted)]">
-                  Non modifiable
-                </p>
+              <div>
+                <label htmlFor="student_id" className={labelClass}>Numéro d'étudiant</label>
+                <Input id="student_id" type="text" name="student_id" value={formData.student_id} onChange={handleChange} disabled />
+                <p className="mt-1 text-xs text-[var(--color-muted)]">Non modifiable</p>
               </div>
 
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading
-                  ? "Enregistrement..."
-                  : "Enregistrer les modifications"}
+              <Button type="submit" disabled={loading}>
+                {loading ? "Enregistrement…" : "Enregistrer"}
               </Button>
             </form>
           </div>
 
-          {/* Changement mot de passe */}
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-8">
-            <h2 className="mb-6 text-2xl font-semibold text-[var(--color-foreground)]">
+          {/* Security */}
+          <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6">
+            <h2 className="mb-4 text-sm font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Sécurité
             </h2>
-            <Button variant="secondary" className="w-full">
-              Changer mon mot de passe
-            </Button>
+            <Button variant="secondary">Changer mon mot de passe</Button>
           </div>
 
-          {/* Zone de danger */}
-          <div className="rounded-[28px] border border-red-200 bg-red-50 p-8">
-            <h2 className="mb-6 text-2xl font-semibold text-red-700">
+          {/* Danger zone */}
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+            <h2 className="mb-1 text-sm font-semibold text-red-600 uppercase tracking-widest">
               Zone de danger
             </h2>
-            <Button
-              variant="ghost"
-              className="w-full text-red-700 hover:bg-red-100"
+            <p className="mb-4 text-xs text-red-500">
+              La suppression de ton compte est irréversible.
+            </p>
+            <button
+              type="button"
+              className="text-sm font-semibold text-red-600 hover:text-red-800 transition"
             >
               Supprimer mon compte
-            </Button>
+            </button>
           </div>
         </div>
 
-        {/* Colonne droite : résumé */}
-        <div className="space-y-6">
-          {/* Infos compte */}
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+        {/* Right — account summary */}
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Membre depuis
-            </h3>
-            <p className="text-lg font-semibold text-[var(--color-foreground)]">
+            </p>
+            <p className="mt-2 text-sm font-semibold text-[var(--color-foreground)]">
               {new Date(currentUser.created_at).toLocaleDateString("fr-FR", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
+                year: "numeric", month: "long", day: "numeric",
               })}
             </p>
           </div>
 
-          {/* Statut */}
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Statut
-            </h3>
-            <div
-              className={`inline-flex rounded-full px-3 py-1 text-sm font-semibold ${
-                currentUser.is_active
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {currentUser.is_active ? (
-                <>
-                  <Check className="mr-1 h-4 w-4" /> Actif
-                </>
-              ) : (
-                "Banni"
-              )}
-            </div>
+            </p>
+            <span className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+              currentUser.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
+            }`}>
+              {currentUser.is_active ? <><Check className="h-3 w-3" /> Actif</> : "Banni"}
+            </span>
           </div>
 
-          {/* Rôle */}
-          <div className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-surface)] p-6">
-            <h3 className="mb-4 text-xs font-semibold uppercase tracking-wide text-[var(--color-muted)]">
+          <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-[var(--color-muted)]">
               Rôle
-            </h3>
-            <p className="text-sm font-semibold capitalize text-[var(--color-foreground)]">
-              {currentUser.role === "moderator" ? (
-                <>
-                  <Shield className="mr-1 h-4 w-4" /> Modérateur
-                </>
-              ) : (
-                <>
-                  <User className="mr-1 h-4 w-4" /> Membre
-                </>
-              )}
+            </p>
+            <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-foreground)]">
+              {currentUser.role === "moderator"
+                ? <><Shield className="h-4 w-4" /> Modérateur</>
+                : <><User className="h-4 w-4" /> Membre</>}
             </p>
           </div>
         </div>

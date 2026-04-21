@@ -20,13 +20,14 @@ export const api = {
 
   post: async (path: string, data?: unknown) => {
     const token = getToken();
+    const isFormData = data instanceof FormData;
     const res = await fetch(`${API_BASE}${path}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: data ? JSON.stringify(data) : undefined,
+      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     });
     if (!res.ok) throw new Error(`Error: ${res.status}`);
     return res.json();

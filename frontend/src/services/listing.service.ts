@@ -35,8 +35,16 @@ export const listingService = {
     type: ListingType;
     price?: number | null;
     categories?: number[];
+    photos?: File[];
   }) => {
-    return api.post('/listings', data);
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('type', data.type);
+    if (data.price != null) formData.append('price', String(data.price));
+    if (data.categories) data.categories.forEach(c => formData.append('categories[]', String(c)));
+    if (data.photos) data.photos.forEach(p => formData.append('photos', p));
+    return api.post('/listings', formData);
   },
 
   update: async (id: number, data: Partial<Listing>) => {

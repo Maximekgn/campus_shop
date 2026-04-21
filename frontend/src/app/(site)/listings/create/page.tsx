@@ -81,6 +81,7 @@ export default function CreateListingPage() {
         type: formData.type,
         price: formData.type === "don" ? null : parseFloat(formData.price),
         categories: formData.category_id ? [parseInt(formData.category_id)] : undefined,
+        photos: photos.map(p => p.file),
       });
       router.push("/my-listings");
     } catch {

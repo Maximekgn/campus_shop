@@ -31,11 +31,20 @@ async function postApi(path: string, data?: unknown): Promise<boolean> {
   }
 }
 
+async function putApi(path: string, data?: unknown): Promise<boolean> {
+  try {
+    await api.put(path, data);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export const moderationService = {
   getPendingListings: async (): Promise<{ data: Listing[] }> => {
     const data = await fetchApi<{ data: Listing[] }>('/moderation/pending');
     if (data) return data;
-    
+
     return {
       data: mockListings.filter((l) => l.status !== 'archivee').slice(0, 5) as Listing[]
     };
@@ -46,20 +55,18 @@ export const moderationService = {
     return (allListings.data || []).find((l) => l.id === id) || null;
   },
 
-  approveListing: async (id: number): Promise<boolean> => {
-    const success = await postApi(`/moderation/listings/${id}/approve`);
-    return success;
+  approveListing: async (id: number | string): Promise<boolean> => {
+    return putApi(`/moderation/listings/${id}/approve`);
   },
 
-  rejectListing: async (id: number, reason?: string): Promise<boolean> => {
-    const success = await postApi(`/moderation/listings/${id}/reject`, { reason });
-    return success;
+  rejectListing: async (id: number | string, reason?: string): Promise<boolean> => {
+    return putApi(`/moderation/listings/${id}/reject`, { reason: reason || 'Non conforme aux règles CampusShop' });
   },
 
   getReports: async (): Promise<AdminReport[]> => {
     const data = await fetchApi<{ data: AdminReport[] }>('/moderation/reports');
     if (data) return data.data;
-    
+
     return [
       { id: 1, listing_id: 2, reason: 'Contenu inapproprié', reporter_id: 2, status: 'pending', created_at: '2026-04-18T10:30:00' },
       { id: 2, listing_id: 3, reason: 'Prix suspect', reporter_id: 1, status: 'pending', created_at: '2026-04-17T14:15:00' },
@@ -67,14 +74,13 @@ export const moderationService = {
   },
 
   resolveReport: async (id: number, action: 'hide' | 'warn' | 'delete'): Promise<boolean> => {
-    const success = await postApi(`/moderation/reports/${id}`, { action });
-    return success;
+    return putApi(`/moderation/reports/${id}`, { action });
   },
 
   getUsers: async (): Promise<User[]> => {
     const data = await fetchApi<{ data: User[] }>('/moderation/users');
     if (data) return data.data;
-    
+
     return mockUsers as User[];
   },
 
@@ -86,7 +92,7 @@ export const moderationService = {
   toggleUserStatus: async (id: string): Promise<boolean> => {
     const user = await moderationService.getUsers().then(users => users.find(u => u.id.toString() === id));
     if (!user) return false;
-    
+
     if (user.is_active) {
       return postApi(`/moderation/users/${id}/ban`, { ban_until: '2026-05-01' });
     } else {
@@ -126,7 +132,7 @@ export const moderationService = {
     ]);
 
     return {
-      pendingCount: pending.data?.length || pending.length,
+      pendingCount: pending.data?.length || 0,
       openReportsCount: reports.filter((r) => r.status === 'pending').length,
       usersCount: users.length,
     };

@@ -4,11 +4,9 @@ import { use, useEffect, useState, ChangeEvent, FormEvent } from "react";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { messageService } from "@/services/message.service";
-import { mockMessages } from "@/data/messages";
-import { mockListings } from "@/data/listings";
-import { mockUsers } from "@/data/users";
+import { useAuthStore } from "@/stores/authStore";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import type { Conversation, Message } from "@/types";
+import type { Conversation, Message, User } from "@/types";
 
 type ConversationDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -19,6 +17,7 @@ export default function ConversationDetailPage({
 }: ConversationDetailPageProps) {
   const { id } = use(params);
   const router = useRouter();
+  const { user } = useAuthStore();
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +56,7 @@ export default function ConversationDetailPage({
     const tempMessage: Message = {
       id: Date.now(),
       conversation_id: Number(id),
-      sender_id: 1,
+      sender_id: user?.id || 0,
       body: messageInput,
       read_at: null,
       created_at: new Date().toISOString(),
@@ -96,18 +95,10 @@ export default function ConversationDetailPage({
     );
   }
 
-  const listing = mockListings.find(
-    (l) => String(l.id) === String(conversation.listing_id),
-  );
-  const otherUser = mockUsers.find(
-    (u) =>
-      String(u.id) ===
-      String(
-        conversation.buyer_id === 1
-          ? conversation.seller_id
-          : conversation.buyer_id,
-      ),
-  );
+  const listing = conversation.listing;
+  const otherUser = (String(conversation.buyer_id) === String(user?.id)
+    ? conversation.seller
+    : conversation.buyer) as User | undefined;
 
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
@@ -150,18 +141,18 @@ export default function ConversationDetailPage({
             messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`flex ${msg.sender_id === 1 ? "justify-end" : "justify-start"}`}
+                className={`flex ${String(msg.sender_id) === String(user?.id) ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-xs rounded-[16px] px-4 py-3 text-sm ${
-                    msg.sender_id === 1
+                    String(msg.sender_id) === String(user?.id)
                       ? "bg-[var(--color-primary)] text-white"
                       : "border border-[var(--color-border)] bg-white text-[var(--color-foreground)]"
                   }`}
                 >
                   <p>{msg.body}</p>
                   <p
-                    className={`mt-1 text-xs ${msg.sender_id === 1 ? "text-white/70" : "text-[var(--color-muted)]"}`}
+                    className={`mt-1 text-xs ${String(msg.sender_id) === String(user?.id) ? "text-white/70" : "text-[var(--color-muted)]"}`}
                   >
                     {new Date(msg.created_at).toLocaleTimeString("fr-FR", {
                       hour: "2-digit",

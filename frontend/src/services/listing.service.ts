@@ -36,6 +36,7 @@ export const listingService = {
     price?: number | null;
     categories?: number[];
     photos?: File[];
+    force_create?: boolean;
   }) => {
     const formData = new FormData();
     formData.append('title', data.title);
@@ -43,8 +44,18 @@ export const listingService = {
     formData.append('type', data.type);
     if (data.price != null) formData.append('price', String(data.price));
     if (data.categories) data.categories.forEach(c => formData.append('categories[]', String(c)));
-    if (data.photos) data.photos.forEach(p => formData.append('photos', p));
-    return api.post('/listings', formData);
+    if (data.force_create) formData.append('force_create', 'true');
+    
+    const response = await api.post('/listings', formData);
+    
+    // Upload photos sequentially to the dedicated endpoint after creation
+    if (response.listing && response.listing.id && data.photos && data.photos.length > 0) {
+      const photosFormData = new FormData();
+      data.photos.forEach(p => photosFormData.append('photos[]', p));
+      await api.post(`/listings/${response.listing.id}/photos`, photosFormData);
+    }
+    
+    return response;
   },
 
   update: async (id: number, data: Partial<Listing>) => {

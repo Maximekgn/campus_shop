@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Eye, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { listingService } from "@/services/listing.service";
+import { getImageUrl } from "@/lib/utils";
 import { mockListings } from "@/data/listings";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import type { Listing } from "@/types";
@@ -11,7 +12,7 @@ import type { Listing } from "@/types";
 const statusMap: Record<string, { label: string; color: string }> = {
   publiee:  { label: "Disponible", color: "bg-emerald-50 text-emerald-700" },
   reservee: { label: "Réservée",   color: "bg-amber-50 text-amber-700"    },
-  vendus:   { label: "Vendue",     color: "bg-red-50 text-red-600"        },
+  vendue:   { label: "Vendue",     color: "bg-red-50 text-red-600"        },
   archivee: { label: "Archivée",   color: "bg-gray-100 text-gray-500"     },
 };
 
@@ -103,7 +104,7 @@ export default function MyListingsPage() {
                 {/* Thumbnail */}
                 <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-[var(--color-surface)]">
                   <img
-                    src={listing.photos?.[0]?.path ?? `https://picsum.photos/seed/${listing.id}/100/100`}
+                    src={getImageUrl(listing.photos?.[0]?.path)}
                     alt={listing.title}
                     className="h-full w-full object-cover"
                   />

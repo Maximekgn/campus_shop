@@ -5,9 +5,11 @@ import type { Listing } from '@/types';
 import { listingService } from '@/services/listing.service';
 import Link from 'next/link';
 import { Package, Heart } from 'lucide-react';
+import { getImageUrl } from '@/lib/utils';
 
 type ListingCardProps = {
   listing: Partial<Listing>;
+  forceFavorited?: boolean;
 };
 
 function isNew(createdAt?: string): boolean {
@@ -22,8 +24,8 @@ const typeLabel: Record<string, string> = {
   échange: 'Échange',
 };
 
-export default function ListingCard({ listing }: ListingCardProps) {
-  const [isFavorited, setIsFavorited] = useState(false);
+export default function ListingCard({ listing, forceFavorited }: ListingCardProps) {
+  const [isFavorited, setIsFavorited] = useState(forceFavorited ?? !!listing.is_favorited);
   const isReserved = listing.status === 'reservee' || listing.status === 'vendue';
   const isNewListing = isNew(listing.created_at);
 
@@ -38,7 +40,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
     }
   };
 
-  const photo = listing.photos?.[0]?.path ?? `https://picsum.photos/seed/${listing.id}/400/300`;
+  const photo = listing.photos?.[0]?.path;
 
   return (
     <Link href={`/listings/${listing.id}`} className="group block h-full">
@@ -51,7 +53,7 @@ export default function ListingCard({ listing }: ListingCardProps) {
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--color-surface)]">
           {photo ? (
             <img
-              src={photo}
+              src={getImageUrl(photo)}
               alt={listing.title}
               className="h-full w-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
             />

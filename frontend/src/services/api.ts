@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://backend.test/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api";
 
 function getToken(): string | null {
   if (typeof window === 'undefined') return null;
@@ -11,6 +11,7 @@ async function request(path: string, options: RequestInit = {}) {
   const url = `${API_BASE}${cleanPath}`;
   
   const headers = {
+    'Accept': 'application/json',
     ...options.headers,
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
@@ -37,9 +38,24 @@ async function request(path: string, options: RequestInit = {}) {
     
     if (!res.ok) {
       const errorText = await res.text();
-      console.error('Error Body:', errorText);
+      console.warn('Error Body:', errorText);
       console.groupEnd();
-      throw new Error(`Error: ${res.status} - ${errorText}`);
+      if (res.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+        document.cookie = 'auth_role=;path=/;max-age=0';
+        window.location.href = '/login';
+        return new Promise(() => {});
+      }
+
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText);
+      } catch (e) {}
+      
+      const err = new Error(errorData?.message || `Error: ${res.status} - ${errorText}`);
+      (err as any).status = res.status;
+      (err as any).data = errorData;
+      throw err;
     }
 
     const data = await res.json();
@@ -48,7 +64,14 @@ async function request(path: string, options: RequestInit = {}) {
     return data;
   } catch (error) {
     console.group(`❌ API Failed: ${cleanPath}`);
-    console.error('Fetch Error:', error);
+    console.warn('Fetch Error:', error);
+    try {
+      if (typeof window !== 'undefined') {
+        console.log('Navigator online:', typeof navigator !== 'undefined' ? navigator.onLine : 'unknown');
+      }
+    } catch (e) {
+      // ignore
+    }
     console.groupEnd();
     throw error;
   }
@@ -68,13 +91,17 @@ export const api = {
 
   put: (path: string, data?: unknown) => {
     return request(path, {
-      method: 'PUT',
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: data ? JSON.stringify(data) : undefined,
+      body: JSON.stringify({ ...(data as any || {}), _method: 'PUT' }),
     });
   },
 
   delete: async (path: string) => {
-    await request(path, { method: 'DELETE' });
+    return request(path, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ _method: 'DELETE' }),
+    });
   },
 };

@@ -26,7 +26,7 @@ type ListingDetailPageProps = {
 const statusMap: Record<string, { label: string; color: string }> = {
   publiee:  { label: "Disponible",  color: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   reservee: { label: "Réservé",     color: "bg-amber-50  text-amber-700  border-amber-200"   },
-  vendus:   { label: "Vendu",       color: "bg-red-50    text-red-700    border-red-200"     },
+  vendue:   { label: "Vendu",       color: "bg-red-50    text-red-700    border-red-200"     },
   archivee: { label: "Archivé",     color: "bg-gray-100  text-gray-500   border-gray-200"    },
 };
 
@@ -99,7 +99,7 @@ export default function ListingDetailPage({ params }: ListingDetailPageProps) {
 
   const status = statusMap[listing.status] ?? { label: listing.status, color: "bg-gray-100 text-gray-600 border-gray-200" };
   const isUnavailable = listing.status === "reservee" || listing.status === "vendue";
-  const seller = listing.user || mockUsers.find((u) => u.id === listing.user_id);
+  const seller = listing.user;
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">

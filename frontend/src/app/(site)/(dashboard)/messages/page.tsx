@@ -4,17 +4,16 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { messageService } from "@/services/message.service";
-import { mockConversations } from "@/data/messages";
-import { mockListings } from "@/data/listings";
-import { mockUsers } from "@/data/users";
+import { useAuthStore } from "@/stores/authStore";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
-import type { Conversation } from "@/types";
+import type { Conversation, User } from "@/types";
 import { MessageCircle, ArrowRight } from "lucide-react";
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { user } = useAuthStore();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -98,12 +97,8 @@ export default function MessagesPage() {
       ) : (
         <div className="divide-y divide-[var(--color-border)] rounded-2xl border border-[var(--color-border)] overflow-hidden">
           {conversations.map((conv) => {
-            const listing = mockListings.find(
-              (l) => String(l.id) === String(conv.listing_id)
-            );
-            const otherUser = mockUsers.find(
-              (u) => String(u.id) === String(conv.buyer_id === 1 ? conv.seller_id : conv.buyer_id)
-            );
+            const listing = conv.listing;
+            const otherUser = (String(conv.buyer_id) === String(user?.id) ? conv.seller : conv.buyer) as User | undefined;
             const date = new Date(conv.last_message_at);
             const isToday = date.toDateString() === new Date().toDateString();
             const timeLabel = isToday

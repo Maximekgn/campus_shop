@@ -24,6 +24,18 @@ class ListingPhoto extends Model
     }
 
     /**
+     * Ajoute automatiquement /storage/ devant le chemin.
+     */
+    public function getPathAttribute($value): string
+    {
+        if (!$value) return '';
+        if (str_starts_with($value, 'http') || str_starts_with($value, '/')) {
+            return $value; // Déjà correct, on ne touche pas
+        }
+        return '/storage/' . $value; // ✅ Corrige le chemin
+    }
+
+    /**
      * The listing this photo belongs to.
      */
     public function listing(): BelongsTo

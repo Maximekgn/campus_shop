@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'active' => EnsureUserIsActive::class,
-            'role:moderateur' => EnsureUserIsModerator::class,
+            'role'   => EnsureUserIsModerator::class,
         ]);
 
         $middleware->api(prepend: [

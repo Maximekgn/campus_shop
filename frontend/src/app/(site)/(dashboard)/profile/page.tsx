@@ -4,18 +4,18 @@ import { ChangeEvent, FormEvent, useState, ReactNode } from "react";
 import { Check, Shield, User } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { mockUsers } from "@/data/users";
+import { useAuthStore } from "@/stores/authStore";
 import type { User as UserType } from "@/types";
 
 const labelClass = "mb-1.5 block text-sm font-semibold text-[var(--color-foreground)]";
 
 export default function ProfilePage(): ReactNode {
-  const currentUser = mockUsers[0] as UserType;
+  const { user: currentUser } = useAuthStore();
 
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    email: currentUser.email,
-    student_id: currentUser.student_id || "",
+    name: currentUser?.name || "",
+    email: currentUser?.email || "",
+    student_id: currentUser?.student_id || "",
   });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -123,9 +123,9 @@ export default function ProfilePage(): ReactNode {
               Membre depuis
             </p>
             <p className="mt-2 text-sm font-semibold text-[var(--color-foreground)]">
-              {new Date(currentUser.created_at).toLocaleDateString("fr-FR", {
+              {currentUser?.created_at ? new Date(currentUser.created_at).toLocaleDateString("fr-FR", {
                 year: "numeric", month: "long", day: "numeric",
-              })}
+              }) : "N/A"}
             </p>
           </div>
 
@@ -134,9 +134,9 @@ export default function ProfilePage(): ReactNode {
               Statut
             </p>
             <span className={`mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-              currentUser.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
+              currentUser?.is_active ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"
             }`}>
-              {currentUser.is_active ? <><Check className="h-3 w-3" /> Actif</> : "Banni"}
+              {currentUser?.is_active ? <><Check className="h-3 w-3" /> Actif</> : "Inactif"}
             </span>
           </div>
 
@@ -145,7 +145,7 @@ export default function ProfilePage(): ReactNode {
               Rôle
             </p>
             <p className="mt-2 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-foreground)]">
-              {currentUser.role === "moderateur"
+              {currentUser?.role === "moderateur"
                 ? <><Shield className="h-4 w-4" /> Modérateur</>
                 : <><User className="h-4 w-4" /> Membre</>}
             </p>

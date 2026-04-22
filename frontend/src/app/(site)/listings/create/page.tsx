@@ -34,6 +34,7 @@ export default function CreateListingPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [duplicateSuggestion, setDuplicateSuggestion] = useState<any>(null);
 
   useEffect(() => {
     categoryService.getAll()
@@ -68,12 +69,13 @@ export default function CreateListingPage() {
 
   const removePhoto = (id: string) => setPhotos((prev) => prev.filter((p) => p.id !== id));
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: FormEvent<HTMLFormElement>, forceCreate = false) => {
+    if (e) e.preventDefault();
     if (!formData.title || !formData.description) { setError("Titre et description sont requis"); return; }
     if (formData.type === "vente" && !formData.price) { setError("Le prix est requis pour une vente"); return; }
     setLoading(true);
     setError("");
+    setDuplicateSuggestion(null);
     try {
       await listingService.create({
         title: formData.title,
@@ -82,11 +84,16 @@ export default function CreateListingPage() {
         price: formData.type === "don" ? null : parseFloat(formData.price),
         categories: formData.category_id ? [parseInt(formData.category_id)] : undefined,
         photos: photos.map(p => p.file),
+        force_create: forceCreate,
       });
       router.push("/my-listings");
-    } catch {
-      await new Promise((r) => setTimeout(r, 1000));
-      router.push("/my-listings");
+    } catch (err: any) {
+      if (err.data?.duplicate_suggestion) {
+        setDuplicateSuggestion(err.data.duplicate_suggestion);
+        setError("Il semble que vous ayez déjà posté une annonce très similaire récemment.");
+      } else {
+        setError(err.message || "Une erreur est survenue lors de la publication");
+      }
     } finally {
       setLoading(false);
     }
@@ -114,6 +121,19 @@ export default function CreateListingPage() {
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {error}
+            {duplicateSuggestion && (
+              <div className="mt-3 flex items-center gap-3">
+                <Button 
+                  type="button" 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={() => handleSubmit(undefined, true)}
+                  disabled={loading}
+                >
+                  Publier quand même
+                </Button>
+              </div>
+            )}
           </div>
         )}
 

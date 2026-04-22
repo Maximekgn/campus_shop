@@ -2,25 +2,29 @@ export const UserRole = {
   MEMBER: 'membre',
   MODERATOR: 'moderateur',
 } as const;
+export type UserRole = typeof UserRole[keyof typeof UserRole];
 
 export const ListingType = {
   SALE: 'vente',
   GIFT: 'don',
   SWAP: 'échange',
 } as const;
+export type ListingType = typeof ListingType[keyof typeof ListingType];
 
 export const ListingStatus = {
-  PUBLISHED: 'publiée',
-  RESERVED: 'réservée',
+  PUBLISHED: 'publiee',
+  RESERVED: 'reservee',
   SOLD: 'vendue',
-  ARCHIVED: 'archivée',
+  ARCHIVED: 'archivee',
+  DRAFT: 'draft',
 } as const;
+export type ListingStatus = typeof ListingStatus[keyof typeof ListingStatus];
 
 export interface User {
   id: number;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
   student_id?: string;
   is_active?: boolean;
   email_verified_at?: string;
@@ -39,13 +43,14 @@ export interface Listing {
   user_id: number;
   title: string;
   description: string;
-  type: string;
+  type: ListingType;
   price: number | null;
-  status: string;
+  status: ListingStatus;
   views_count: number;
   photos: ListingPhoto[];
   user?: User;
   categories?: Category[];
+  is_favorited?: boolean;
   created_at: string;
 }
 

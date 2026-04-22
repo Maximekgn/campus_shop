@@ -9,7 +9,7 @@ import { moderationService } from "@/services/moderation.service";
 
 export default function PendingListingsPage(): ReactNode {
   const [pendingListings, setPendingListings] = useState<Listing[]>([]);
-  const [busyId, setBusyId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +31,7 @@ export default function PendingListingsPage(): ReactNode {
 
   const actionableListings = useMemo(() => pendingListings, [pendingListings]);
 
-  const handleApprove = async (id: string) => {
+  const handleApprove = async (id: number) => {
     setBusyId(id);
     setError("");
     try {
@@ -44,7 +44,7 @@ export default function PendingListingsPage(): ReactNode {
     }
   };
 
-  const handleReject = async (id: string) => {
+  const handleReject = async (id: number) => {
     setBusyId(id);
     setError("");
     try {

@@ -88,7 +88,7 @@ export default function PendingListingDetailPage(): ReactNode {
     setStatusMessage('');
 
     try {
-      await moderationService.saveListingModeratorNote(id, internalNote);
+      await moderationService.saveListingModeratorNote(Number(id), internalNote);
       setStatusMessage('Note interne enregistrée.');
     } finally {
       setBusyAction(null);

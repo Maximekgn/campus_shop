@@ -3,6 +3,7 @@
 import { useState, ReactNode } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
+import { getImageUrl } from '@/lib/utils';
 import type { ListingPhoto } from '@/types';
 
 type PhotoGalleryProps = {
@@ -46,7 +47,7 @@ export default function PhotoGallery({ photos, listingId }: PhotoGalleryProps): 
           onClick={() => setLightboxOpen(true)}
         >
           <Image
-            src={mainPhoto.path}
+            src={getImageUrl(mainPhoto.path)}
             alt="Photo principale"
             fill
             className="object-cover"
@@ -75,7 +76,7 @@ export default function PhotoGallery({ photos, listingId }: PhotoGalleryProps): 
                 }`}
               >
                 <Image
-                  src={photo.path}
+                  src={getImageUrl(photo.path)}
                   alt={`Photo ${idx + 1}`}
                   fill
                   className="object-cover"
@@ -98,7 +99,7 @@ export default function PhotoGallery({ photos, listingId }: PhotoGalleryProps): 
 
             <div className="relative h-96 w-full overflow-hidden rounded-[16px]">
               <Image
-                src={photos[currentPhotoIndex].path}
+                src={getImageUrl(photos[currentPhotoIndex].path)}
                 alt={`Photo ${currentPhotoIndex + 1}`}
                 fill
                 className="object-contain"

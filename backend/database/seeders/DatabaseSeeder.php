@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Conversation;
 use App\Models\Favorite;
 use App\Models\Listing;
+use App\Models\ListingPhoto;
 use App\Models\Message;
 use App\Models\Report;
 use App\Models\User;
@@ -69,6 +70,96 @@ class DatabaseSeeder extends Seeder
         $listings->push(Listing::factory()->echange()->for($testUser)->create(['title' => 'Échange livre Physique contre Chimie']));
 
         $publishedListings = $listings->where('status', 'publiee');
+
+        // ── 3a. Replace some published listings with logical items and attach images ──
+        $custom = [
+            [
+                'title' => 'Stylo Bic (lot de 5)',
+                'description' => 'Lot de 5 stylos Bic, en très bon état. Idéal pour les cours.',
+                'type' => 'vente',
+                'price' => 2.50,
+                'photos' => ['pen.svg'],
+            ],
+            [
+                'title' => 'Clé USB 32GB',
+                'description' => 'Clé USB 32 Go, fonctionne parfaitement.',
+                'type' => 'vente',
+                'price' => 8.00,
+                'photos' => ['usb.svg'],
+            ],
+            [
+                'title' => 'Souris sans fil Logitech',
+                'description' => 'Souris sans fil compacte, pile neuve.',
+                'type' => 'vente',
+                'price' => 12.00,
+                'photos' => ['mouse.svg'],
+            ],
+            [
+                'title' => 'Chargeur USB-C 18W',
+                'description' => 'Chargeur USB-C compatible smartphones et tablettes.',
+                'type' => 'vente',
+                'price' => 9.00,
+                'photos' => ['charger.svg'],
+            ],
+            [
+                'title' => 'Casque audio (occasion)',
+                'description' => 'Casque audio supra-auriculaire, état correct.',
+                'type' => 'don',
+                'price' => null,
+                'photos' => ['headphones.svg'],
+            ],
+        ];
+
+        // Build absolute base URL for images (APP_URL expected in .env)
+        $baseUrl = env('APP_URL', 'http://127.0.0.1:8000');
+
+        // Update up to N existing published listings with our custom entries
+        $i = 0;
+        foreach ($publishedListings->values() as $listing) {
+            if (!isset($custom[$i])) break;
+            $data = $custom[$i];
+            $listing->update([
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'type' => $data['type'],
+                'price' => $data['price'],
+            ]);
+
+            // Remove old photos and attach our custom images (absolute URLs)
+            $listing->photos()->delete();
+            foreach ($data['photos'] as $idx => $file) {
+                ListingPhoto::create([
+                    'listing_id' => $listing->id,
+                    'path' => $baseUrl . '/images/' . $file,
+                    'order' => $idx,
+                ]);
+            }
+
+            $i++;
+        }
+
+        // If there are more custom items than existing listings, create them
+        for ($j = $i; $j < count($custom); $j++) {
+            $data = $custom[$j];
+            $owner = $allMembers->random();
+            $new = Listing::create([
+                'user_id' => $owner->id,
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'type' => $data['type'],
+                'price' => $data['price'],
+                'status' => 'publiee',
+                'views_count' => rand(0, 200),
+            ]);
+
+            foreach ($data['photos'] as $idx => $file) {
+                ListingPhoto::create([
+                    'listing_id' => $new->id,
+                    'path' => $baseUrl . '/images/' . $file,
+                    'order' => $idx,
+                ]);
+            }
+        }
 
         // ── 4. Create conversations and messages ──
         foreach ($publishedListings->random(min(8, $publishedListings->count())) as $listing) {

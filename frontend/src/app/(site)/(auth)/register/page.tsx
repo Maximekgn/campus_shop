@@ -31,7 +31,7 @@ export default function RegisterPage(): ReactNode {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.password || !formData.student_id) {
+    if (!formData.name || !formData.email || !formData.password) {
       setError("Tous les champs sont requis"); return;
     }
     if (formData.password !== formData.password_confirmation) {

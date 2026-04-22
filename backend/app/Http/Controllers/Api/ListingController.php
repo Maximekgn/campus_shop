@@ -20,6 +20,13 @@ class ListingController extends Controller
     {
         $query = Listing::active()->with(['user:id,name', 'photos']);
 
+        $user = $request->user('sanctum');
+        if ($user) {
+            $query->withExists(['favorites as is_favorited' => function ($q) use ($user) {
+                $q->where('user_id', $user->id);
+            }]);
+        }
+
         // Search by title or description
         if ($request->filled('q')) {
             $search = $request->input('q');
@@ -122,10 +129,12 @@ class ListingController extends Controller
         $words = array_filter(explode(' ', $request->title), fn($w) => strlen($w) > 3);
         $possibleDuplicates = null;
         if (!empty($words) && !$request->has('force_create')) {
-            $dupQuery = Listing::where('user_id', $request->user()->id);
-            foreach ($words as $word) {
-                $dupQuery->orWhere('title', 'like', "%{$word}%");
-            }
+            $dupQuery = Listing::where('user_id', $request->user()->id)
+                ->where(function ($q) use ($words) {
+                    foreach ($words as $word) {
+                        $q->orWhere('title', 'like', "%{$word}%");
+                    }
+                });
             $existing = $dupQuery->first();
             
             if ($existing) {
@@ -150,7 +159,7 @@ class ListingController extends Controller
             $listing->categories()->sync($request->input('categories'));
         }
 
-        $listing->load('photos', 'categories');
+        $listing->load('photos', 'categories', 'user:id,name,email');
 
         return response()->json([
             'message' => 'Annonce créée avec succès. Elle sera visible après validation par un modérateur.',
@@ -203,8 +212,12 @@ class ListingController extends Controller
      */
     public function myListings(Request $request): JsonResponse
     {
+        $userId = $request->user()->id;
         $listings = Listing::mine()
             ->with(['photos'])
+            ->withExists(['favorites as is_favorited' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
             ->orderBy('created_at', 'desc')
             ->paginate($request->input('per_page', 15));
 

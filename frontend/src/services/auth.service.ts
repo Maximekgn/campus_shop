@@ -7,7 +7,7 @@ interface AuthResponse {
   message?: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api";
 
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -25,6 +25,8 @@ export const authService = {
     }
     const data = await res.json();
     localStorage.setItem('auth_token', data.token);
+    // Also store in cookie so Next.js middleware can read it server-side
+    document.cookie = `auth_token=${data.token};path=/;max-age=${60 * 60 * 24 * 7};SameSite=Lax`;
     document.cookie = `auth_role=${data.user.role};path=/;max-age=${60 * 60 * 24 * 7}`;
     return data;
   },
@@ -44,6 +46,8 @@ export const authService = {
     }
     const response = await res.json();
     localStorage.setItem('auth_token', response.token);
+    // Also store in cookie so Next.js middleware can read it server-side
+    document.cookie = `auth_token=${response.token};path=/;max-age=${60 * 60 * 24 * 7};SameSite=Lax`;
     document.cookie = `auth_role=${response.user.role};path=/;max-age=${60 * 60 * 24 * 7}`;
     return response;
   },
@@ -61,6 +65,7 @@ export const authService = {
         });
       } finally {
         localStorage.removeItem('auth_token');
+        document.cookie = 'auth_token=;path=/;max-age=0';
         document.cookie = 'auth_role=;path=/;max-age=0';
       }
     }

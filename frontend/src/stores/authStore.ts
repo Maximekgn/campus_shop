@@ -60,6 +60,10 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         await authService.logout();
+        if (typeof document !== 'undefined') {
+          document.cookie = 'auth_token=;path=/;max-age=0';
+          document.cookie = 'auth_role=;path=/;max-age=0';
+        }
         set({ user: null, isAuthenticated: false });
       },
 

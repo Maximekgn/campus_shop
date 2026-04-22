@@ -47,10 +47,14 @@ class FavoriteController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $favorites = Listing::whereHas('favorites', function ($query) use ($request) {
-            $query->where('user_id', $request->user()->id);
+        $userId = $request->user()->id;
+        $favorites = Listing::whereHas('favorites', function ($query) use ($userId) {
+            $query->where('user_id', $userId);
         })
             ->with(['user:id,name', 'photos'])
+            ->withExists(['favorites as is_favorited' => function ($query) use ($userId) {
+                $query->where('user_id', $userId);
+            }])
             ->active()
             ->orderBy('created_at', 'desc')
             ->paginate($request->input('per_page', 15));

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Toaster } from "react-hot-toast";
+import ToasterClient from "../components/ToasterClient";
+import BodyCleanup from "../components/BodyCleanup";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,31 +29,9 @@ export default function RootLayout({
       lang="fr"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-screen bg-background text-foreground">
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3000,
-            style: {
-              borderRadius: '16px',
-              padding: '12px 16px',
-            },
-            success: {
-              style: {
-                background: '#ECFDF5',
-                color: '#065F46',
-                border: '1px solid #A7F3D0',
-              },
-            },
-            error: {
-              style: {
-                background: '#FEF2F2',
-                color: '#991B1B',
-                border: '1px solid #FECACA',
-              },
-            },
-          }}
-        />
+      <body suppressHydrationWarning className="min-h-screen bg-background text-foreground">
+        <BodyCleanup />
+        <ToasterClient />
         <main className="min-h-screen w-full">{children}</main>
       </body>
     </html>

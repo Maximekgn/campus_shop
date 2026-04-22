@@ -14,7 +14,7 @@ start "Backend (Laravel)" cmd /k "cd backend && php artisan serve"
 
 :: Lancement du Frontend (Next.js avec Bun) dans un nouveau terminal
 echo [2/2] Lancement du Frontend (Next.js)...
-start "Frontend (Next.js)" cmd /k "cd frontend && bun run dev"
+start "Frontend (Next.js)" cmd /k "cd frontend && npm run dev"
 
 echo.
 echo ==========================================

@@ -12,7 +12,7 @@ function formatPrice(listing) {
 
 function listingImage(listing) {
     const firstPhoto = listing.photos?.[0]
-    return firstPhoto?.path ? `/storage/${firstPhoto.path}` : '/images/tom.jpg'
+    return firstPhoto?.path ? firstPhoto.path : '/images/tom.jpg'
 }
 
 export default function Search() {

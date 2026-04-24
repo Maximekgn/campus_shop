@@ -12,7 +12,7 @@ import { getAuthToken } from '@/lib/auth'
 function listingImage(listing) {
     const firstPhoto = listing.photos?.[0]
     if (!firstPhoto?.path) return '/images/tom.jpg'
-    return `/storage/${firstPhoto.path}`
+    return firstPhoto.path
 }
 
 function formatPrice(listing) {

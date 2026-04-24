@@ -82,7 +82,7 @@ class ListingPhotoController extends Controller
         }
 
         // Delete the file from storage
-        Storage::disk('public')->delete($photo->path);
+        Storage::disk('public')->delete($photo->getRawOriginal('path'));
 
         $photo->delete();
 
